@@ -2,9 +2,7 @@ package com.bookstore.Service.mapper;
 
 import com.bookstore.Model.Book;
 import com.bookstore.Model.Format;
-import com.bookstore.Repository.AwardsRepository;
-import com.bookstore.Repository.BookRepository;
-import com.bookstore.Repository.FormatRepository;
+import com.bookstore.Repository.*;
 import com.bookstore.Service.dto.BookCsvDto;
 import jakarta.persistence.Column;
 import jakarta.transaction.Transactional;
@@ -25,6 +23,14 @@ public class BookDtoToBookDBMapper {
     BookDtoToFormatMapper bookDtoFormatMapper;
     @Autowired
     FormatRepository formatRepository;
+    @Autowired
+    BookToAuthorMapper bookToAuthorMapper;
+    @Autowired
+    AuthorRepository authorRepository;
+    @Autowired
+    BookToPublisherMapper bookDtoToPublisherMapper;
+    @Autowired
+    PublisherRepository publisherRepository;
 
     public Book bookToAwardMapper(BookCsvDto bookDto) {
             Book book = new Book();
@@ -48,6 +54,9 @@ public class BookDtoToBookDBMapper {
             book.setAwards(awardMapper.bookToAwardMapper(bookDto, book));
             book.setCharacters(characterMapper.mapBookDtoToCharacter(bookDto, book));
             book.setFormat(bookDtoFormatMapper.mapBookToFormat(bookDto, formatRepository));
+            book.setAuthor(bookToAuthorMapper.bookToAuthorMapper(bookDto, authorRepository));
+            book.setPublisher(bookDtoToPublisherMapper.bookToPublisherMapper(bookDto, publisherRepository));
+
         return book;
     }
 }

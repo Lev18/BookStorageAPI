@@ -82,7 +82,7 @@ public class Book {
     List<Awards> awards;
 
     @OneToMany(mappedBy = "book")
-    List<BookCharacters> characters;
+    List<Characters> characters;
 
 
     @OneToMany(mappedBy="book")

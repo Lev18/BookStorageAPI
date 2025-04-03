@@ -21,6 +21,6 @@ public class BookDtoToFormatMapper {
         Format format = formatRepositor.findByBookFormat(bookDto.getBookFormat())
                 .orElseGet(()->formatRepositor.save(new Format(bookDto.getBookFormat())));
         formatCache.put(bookFormat, format);
-        return format;
+        return null;
     }
 }

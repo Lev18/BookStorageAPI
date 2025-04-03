@@ -16,4 +16,11 @@ public class Author {
 
     @OneToMany(mappedBy = "author")
     List<Book> books;
+
+    public Author() {
+    }
+
+    public Author(String author) {
+        this.authorName=author;
+    }
 }

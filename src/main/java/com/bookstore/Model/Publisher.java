@@ -1,11 +1,15 @@
 package com.bookstore.Model;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Table(name = "publishers")
+@Setter
+@Getter
+
 public class Publisher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,4 +20,8 @@ public class Publisher {
     
     @OneToMany(mappedBy = "publisher")
     List<Book> books;
+
+    public Publisher(String publisherName) {
+        this.publisherName = publisherName;
+    }
 }
