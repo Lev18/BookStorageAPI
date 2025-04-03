@@ -1,12 +1,16 @@
 package com.bookstore.Model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "characters")
-public class Characters {
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class BookCharacters {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

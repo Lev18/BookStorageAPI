@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@Transactional
 public class BookDtoToAwardMapper {
     public List<Awards> bookToAwardMapper(BookCsvDto bookCsvDto, Book book) {
         List<Awards> awards = new ArrayList<>();

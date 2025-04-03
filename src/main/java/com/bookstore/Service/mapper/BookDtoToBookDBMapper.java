@@ -20,6 +20,8 @@ public class BookDtoToBookDBMapper {
     @Autowired
     BookDtoToAwardMapper awardMapper;
     @Autowired
+    BookDtoToCharacterMapper characterMapper;
+    @Autowired
     BookDtoToFormatMapper bookDtoFormatMapper;
     @Autowired
     FormatRepository formatRepository;
@@ -44,6 +46,7 @@ public class BookDtoToBookDBMapper {
             book.setBbeVotes(bookDto.getBbeVotes());
             book.setPrice(bookDto.getPrice());
             book.setAwards(awardMapper.bookToAwardMapper(bookDto, book));
+            book.setCharacters(characterMapper.mapBookDtoToCharacter(bookDto, book));
             book.setFormat(bookDtoFormatMapper.mapBookToFormat(bookDto, formatRepository));
         return book;
     }

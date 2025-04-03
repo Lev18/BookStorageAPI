@@ -81,6 +81,10 @@ public class Book {
     @OneToMany(mappedBy="book")
     List<Awards> awards;
 
+    @OneToMany(mappedBy = "book")
+    List<BookCharacters> characters;
+
+
     @OneToMany(mappedBy="book")
     List<BookGenre> genres;
 

@@ -31,6 +31,7 @@ public class CsvReaderService {
             System.out.println("File already processed");
             return List.of();
         }
+
         FileHash fileHash = new FileHash(hash);
         List<BookCsvDto> books = parseCsv(file);
          fileRepository.save(fileHash);
