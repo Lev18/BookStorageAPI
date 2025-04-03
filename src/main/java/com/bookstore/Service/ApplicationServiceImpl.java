@@ -4,16 +4,15 @@ import com.bookstore.Model.Awards;
 import com.bookstore.Model.Book;
 import com.bookstore.Repository.AwardsRepository;
 import com.bookstore.Repository.BookRepository;
-import com.bookstore.Service.FileReader.CsvReaderService;
 import com.bookstore.Service.dto.BookCsvDto;
-import com.bookstore.Service.mapper.BookDtoToAwardMapper;
 import com.bookstore.Service.mapper.BookDtoToBookDBMapper;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Component("appServiceImpl")
 public class ApplicationServiceImpl implements ApplicationService{
@@ -24,12 +23,17 @@ public class ApplicationServiceImpl implements ApplicationService{
     @Autowired
     private AwardsRepository awardsRepository;
 
-    public void saveBook(List<BookCsvDto> bookCsvDtos) {
+    public int saveBook(List<BookCsvDto> bookCsvDtos) {
+        List<Book> allBooks = new ArrayList<>();
+        Set<Awards> allAwards = new HashSet<>();
         for (BookCsvDto bookCsvDto : bookCsvDtos) {
             Book book = bookDtoToBookDBMapper.bookToAwardMapper(bookCsvDto);
-            bookRepository.save(book);
-            awardsRepository.saveAll(book.getAwards());
+            allBooks.add(book);
+            allAwards.addAll(book.getAwards());
         }
+
+        bookRepository.saveAll(allBooks);
+        awardsRepository.saveAll(allAwards);
        // List<Awards> awards = awardMapper.bookToAwardMapper(bookCsvDtos);
 
 
@@ -39,6 +43,7 @@ public class ApplicationServiceImpl implements ApplicationService{
 //        }
 
        // awardsRepository.saveAll(awards);
+        return bookCsvDtos.size();
     }
 
 }

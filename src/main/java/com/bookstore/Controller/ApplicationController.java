@@ -46,9 +46,14 @@ public class ApplicationController {
 
     @PostMapping(path = "/upload-file",consumes = {"multipart/form-data"})
     @SneakyThrows
-    public ResponseEntity<Integer> uploadBookStore(@RequestPart("file") MultipartFile file){
-        List<BookCsvDto> csvDtos = csvReaderService.uploadBooks(file);
-        applicationService.saveBook(csvDtos);
-        return ResponseEntity.ok(csvDtos.size());
+    public ResponseEntity<?> uploadBookStore(@RequestPart("file") MultipartFile file){
+        List<BookCsvDto> csvDTos = csvReaderService.uploadBooks(file);
+        if (csvDTos.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("File already parsed NO new book");
+        }
+
+        int savedBook = applicationService.saveBook(csvDTos);
+        return ResponseEntity.ok(savedBook + " new book were added");
+
     }
 }
