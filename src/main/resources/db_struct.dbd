@@ -1,0 +1,128 @@
+  id;
+  bookId;
+  title;
+  series;
+  rating;
+  description;
+  language;
+  isbn;
+  edition;
+  pages;
+  publishDate;
+  firstPublishDate;
+  numRatings;
+  likedPercent;
+  coverImg;
+  bbeScore;
+  bbeVotes;
+  price;
+  author_id;
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table book {
+  id integer [primary key]
+  bookId varchar
+  title varchar
+  series varchar
+  rating integer
+  description varchar
+  language varchar
+  isbn varchar
+  edition varchar
+  pages integer
+  publishDate timestamp
+  firstPublishDate timestamp
+  numRatings integer
+  likedPercent integer
+  coverImg varchar
+  bbeScore integer
+  bbeVotes  integer
+  price double
+  author_id integer [not null]
+  format_id integer [not null]
+  publsher_id integer [not null]
+
+}
+
+Table author {
+  id integer [primary key]
+  author_name varchar
+}
+
+Table format {
+  id integer [primary key]
+  book_format varchar
+}
+
+Table characters{
+  id integer [primary key]
+  book_id integer [not null]
+  charName varchar
+}
+
+
+Table publisher {
+  id integer [primary key]
+  publisher_name varchar
+}
+
+Table awards {
+  id integer [primary key]
+  book_id integer [not null]
+  award_title varchar
+}
+
+Table genre {
+  id integer [primary key]
+  genre_title varchar
+}
+
+
+Table book_genre {
+  id integer [primary key]
+  book_id integer [not null]
+  genre_id integer [not null]
+}
+
+
+Table setting {
+  id integer [primary key]
+  setting_loc varchar
+}
+
+
+Table book_setting {
+  id integer [primary key]
+  book_id integer [not null]
+  setting_id integer [not null]
+}
+
+Table ratingsByStars {
+  id integer [primary key]
+  book_id integer [not null]
+  stars varchar
+}
+
+Ref: author.id < book.author_id 
+Ref: format.id < book.format_id 
+
+Ref: book.id < characters.book_id
+Ref: book.id < awards.book_id
+Ref: book.id < ratingsByStars.book_id
+
+
+Ref: book.id < book_genre.book_id
+Ref: genre.id < book_genre.genre_id
+Ref: book.id < book_setting.book_id
+Ref: setting.id < book_setting.setting_id
+
+
+Ref: publisher.id < book.publsher_id
+
+// Ref user_posts: posts.user_id > users.id // many-to-one
+
+
+
+// Ref: users.id < follows.followed_user_id
+
