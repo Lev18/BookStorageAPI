@@ -51,9 +51,7 @@ public class ApplicationController {
         if (csvDTos.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("File already parsed NO new book");
         }
-
         int savedBook = applicationService.saveBook(csvDTos);
         return ResponseEntity.ok(savedBook + " new book were added");
-
     }
 }

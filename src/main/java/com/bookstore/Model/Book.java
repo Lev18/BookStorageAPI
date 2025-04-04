@@ -89,5 +89,5 @@ public class Book {
     List<BookGenre> genres;
 
     @OneToMany(mappedBy="book")
-    List<BookSetting> settings;    
+    List<BookSetting> settings;
 }

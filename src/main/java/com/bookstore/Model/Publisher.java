@@ -9,7 +9,6 @@ import java.util.List;
 @Table(name = "publishers")
 @Setter
 @Getter
-
 public class Publisher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,6 +19,7 @@ public class Publisher {
     
     @OneToMany(mappedBy = "publisher")
     List<Book> books;
+    public Publisher(){}
 
     public Publisher(String publisherName) {
         this.publisherName = publisherName;

@@ -8,6 +8,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "genres")
+@Getter
+@Setter
 public class Genre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,5 +19,10 @@ public class Genre {
     private String genreTitle;
     
     @OneToMany(mappedBy="genre")
-    List<BookGenre> genres;    
+    List<BookGenre> genres;
+
+    public Genre(String genreTitle) {
+        this.genreTitle = genreTitle;
+    }
+
 }
