@@ -21,6 +21,8 @@ public class Genre {
     @OneToMany(mappedBy="genre")
     List<BookGenre> genres;
 
+    public Genre() {}
+
     public Genre(String genreTitle) {
         this.genreTitle = genreTitle;
     }

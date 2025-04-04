@@ -67,7 +67,7 @@ public class Book {
     public String price;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id") 
+    @JoinColumn(name = "author_id", nullable = true)
     Author author;
    
     @ManyToOne(fetch = FetchType.LAZY)
@@ -90,4 +90,7 @@ public class Book {
 
     @OneToMany(mappedBy="book")
     List<BookSetting> settings;
+
+    @OneToMany(mappedBy="ratingStars")
+    List<RatingByStars> stars;
 }

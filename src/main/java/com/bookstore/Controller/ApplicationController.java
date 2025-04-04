@@ -1,7 +1,9 @@
 package com.bookstore.Controller;
 
+import com.bookstore.Model.Book;
 import com.bookstore.Service.ApplicationService;
 import com.bookstore.Service.ApplicationServiceImpl;
+import com.bookstore.Service.BookService;
 import com.bookstore.Service.FileReader.CsvReaderService;
 import com.bookstore.Service.dto.BookCsvDto;
 import jakarta.annotation.Resource;
@@ -26,6 +28,9 @@ public class ApplicationController {
     @Autowired
     @Qualifier("appServiceImpl")
     private  ApplicationService applicationService;
+    @Autowired
+    private BookService bookService;
+
     List<BookCsvDto> books = new ArrayList<>();
 
     public ApplicationController(CsvReaderService csvReaderService) {
@@ -52,6 +57,16 @@ public class ApplicationController {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("File already parsed NO new book");
         }
         int savedBook = applicationService.saveBook(csvDTos);
-        return ResponseEntity.ok(savedBook + " new book were added");
+        return ResponseEntity.ok(savedBook + " new book were added\n");
     }
+
+    @PutMapping(path = "/updateRating/{book_id}/{newRate}")
+    public ResponseEntity<?> updateBookRating(@PathVariable String book_id, @PathVariable String newRate) {
+        Book updatedBook = bookService.updateBookRating(book_id, newRate);
+        if (updatedBook == null) {
+            return  ResponseEntity.status(HttpStatus.NO_CONTENT).body("Book not found\n");
+        }
+        return ResponseEntity.ok(updatedBook.getBookId() + " book's rating was updated successfully");
+    }
+
 }

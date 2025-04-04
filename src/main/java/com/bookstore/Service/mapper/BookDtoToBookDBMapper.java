@@ -18,6 +18,8 @@ public class BookDtoToBookDBMapper {
     @Autowired
     BookDtoToAwardMapper awardMapper;
     @Autowired
+    BookDtoToRatingsMapper ratingMapper;
+    @Autowired
     BookDtoToCharacterMapper characterMapper;
     @Autowired
     BookDtoToFormatMapper bookDtoFormatMapper;
@@ -52,7 +54,10 @@ public class BookDtoToBookDBMapper {
             book.setBbeScore(bookDto.getBbeScore());
             book.setBbeVotes(bookDto.getBbeVotes());
             book.setPrice(bookDto.getPrice());
+
+            //  relational databases configurations
             book.setAwards(awardMapper.bookToAwardMapper(bookDto, book));
+            book.setStars(ratingMapper.bookToRatingsMapper(bookDto, book));
             book.setCharacters(characterMapper.mapBookDtoToCharacter(bookDto, book));
             book.setFormat(bookDtoFormatMapper.mapBookToFormat(bookDto, formatRepository));
             book.setAuthor(bookToAuthorMapper.bookToAuthorMapper(bookDto, authorRepository));

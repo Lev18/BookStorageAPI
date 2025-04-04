@@ -19,6 +19,8 @@ public class ApplicationServiceImpl implements ApplicationService{
     @Autowired
     BookDtoToBookDBMapper bookDtoToBookDBMapper;
     @Autowired
+    BookToGenreMapper bookToGenreMapper;
+    @Autowired
     BookRepository bookRepository;
     @Autowired
     private AwardsRepository awardsRepository;
@@ -29,21 +31,23 @@ public class ApplicationServiceImpl implements ApplicationService{
     @Autowired
     GenreRepository genreRepository;
     @Autowired
-    BookToGenreMapper bookToGenreMapper;
+    RatingByStarsRepository ratingByStarsRepository;
 
     @Transactional
     public int saveBook(List<BookCsvDto> bookCsvDtos) {
         List<Book> allBooks = new ArrayList<>();
         List<BookGenre> allBookGenres = new ArrayList<>();
         Set<Awards> allAwards = new HashSet<>();
+        Set<RatingByStars> ratingByStars = new HashSet<>();
         Set<Characters> allCharacters = new HashSet<>();
         Set<Genre> allGenres = new HashSet<>();
-        
+
         for (BookCsvDto bookCsvDto : bookCsvDtos) {
 //            ImageLoader.uploadImage(bookCsvDto.getCoverImg());
             Book book = bookDtoToBookDBMapper.bookToAwardMapper(bookCsvDto);
             allBooks.add(book);
             allAwards.addAll(book.getAwards());
+            ratingByStars.addAll(book.getStars());
             allCharacters.addAll(book.getCharacters());
 
             List<Genre> bookGenres = bookToGenreMapper.findOrCreateGenre(bookCsvDto, genreRepository);
@@ -60,6 +64,7 @@ public class ApplicationServiceImpl implements ApplicationService{
         genreRepository.saveAll(allGenres);
         bookRepository.saveAll(allBooks);
         awardsRepository.saveAll(allAwards);
+        ratingByStarsRepository.saveAll(ratingByStars);
         charactersRepository.saveAll(allCharacters);
 
         return bookCsvDtos.size();
