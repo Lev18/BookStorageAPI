@@ -10,7 +10,9 @@ import java.util.Map;
 
 @Component
 public class BookToAuthorMapper {
+    // check in db no in memory
     private Map<String, Author> authorCache = new HashMap<>();
+
     public Author bookToAuthorMapper(BookCsvDto bookDto, AuthorRepository authorRepository) {
         String bookFormat = bookDto.getBookFormat();
         if (authorCache.containsKey(bookFormat)) {

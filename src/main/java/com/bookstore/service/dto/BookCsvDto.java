@@ -14,10 +14,13 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class BookCsvDto {
+
     @CsvBindByName(column = "bookId")
     public String bookId;
+
     @CsvBindByName(column = "title")
     public String title;
+
     @CsvBindByName(column = "series")
     public String series;
     @CsvBindByName(column = "author")

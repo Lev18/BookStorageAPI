@@ -17,7 +17,7 @@ public class BookDtoToAwardMapper {
         List<Awards> awards = new ArrayList<>();
            for (String award : bookCsvDto.getAwards()) {
                Awards awards1 = new Awards();
-               if (!award.isEmpty() && !award.isBlank()) {
+               if (!award.isBlank()) {
                    awards1.setAwardTitle(award);
                    awards1.setBook(book);
                    awards.add(awards1);

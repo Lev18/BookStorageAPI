@@ -1,37 +1,31 @@
-package com.bookstore.Service;
+package com.bookstore.service;
 
-import com.bookstore.Model.*;
-import com.bookstore.Repository.*;
-import com.bookstore.Service.dto.BookCsvDto;
-import com.bookstore.Service.mapper.BookDtoToBookDBMapper;
-import com.bookstore.Service.mapper.BookToGenreMapper;
+import com.bookstore.entity.*;
+import com.bookstore.repository.*;
+import com.bookstore.service.dto.BookCsvDto;
+import com.bookstore.service.mapper.BookDtoToBookDBMapper;
+import com.bookstore.service.mapper.BookToGenreMapper;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+// handle preloading of the same elements of
 @Component("appServiceImpl")
+@AllArgsConstructor
 public class ApplicationServiceImpl implements ApplicationService{
-    @Autowired
-    BookDtoToBookDBMapper bookDtoToBookDBMapper;
-    @Autowired
-    BookToGenreMapper bookToGenreMapper;
-    @Autowired
-    BookRepository bookRepository;
-    @Autowired
-    private AwardsRepository awardsRepository;
-    @Autowired
-    private  CharactersRepository charactersRepository;
-    @Autowired
-    BookGenreRepository bookGenreRepository;
-    @Autowired
-    GenreRepository genreRepository;
-    @Autowired
-    RatingByStarsRepository ratingByStarsRepository;
+
+    private final BookDtoToBookDBMapper bookDtoToBookDBMapper;
+    private final BookToGenreMapper bookToGenreMapper;
+    private final BookRepository bookRepository;
+    private final AwardsRepository awardsRepository;
+    private final CharactersRepository charactersRepository;
+    private final BookGenreRepository bookGenreRepository;
+    private final GenreRepository genreRepository;
+    private final RatingByStarsRepository ratingByStarsRepository;
 
     @Transactional
     public int saveBook(List<BookCsvDto> bookCsvDtos) {
@@ -49,7 +43,8 @@ public class ApplicationServiceImpl implements ApplicationService{
             allAwards.addAll(book.getAwards());
             ratingByStars.addAll(book.getStars());
             allCharacters.addAll(book.getCharacters());
-
+            // TODO: how collect genres into set
+            // Optimize genre creation process to not query database for each book genres
             List<Genre> bookGenres = bookToGenreMapper.findOrCreateGenre(bookCsvDto, genreRepository);
             allGenres.addAll(bookGenres);
             for (Genre genre : bookGenres) {

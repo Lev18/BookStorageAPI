@@ -7,6 +7,7 @@ import com.bookstore.Service.BookService;
 import com.bookstore.Service.FileReader.CsvReaderService;
 import com.bookstore.Service.dto.BookCsvDto;
 import jakarta.annotation.Resource;
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,6 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api")
+//TODO change class name
+@AllArgsConstructor
 public class ApplicationController {
     private final CsvReaderService csvReaderService;
     @Autowired
@@ -30,8 +33,6 @@ public class ApplicationController {
     private  ApplicationService applicationService;
     @Autowired
     private BookService bookService;
-
-    List<BookCsvDto> books = new ArrayList<>();
 
     public ApplicationController(CsvReaderService csvReaderService) {
         this.csvReaderService = csvReaderService;
@@ -42,13 +43,13 @@ public class ApplicationController {
         return "Welcome";
     }
 
-    @PostMapping(path = "/insert-book")
-    @ResponseStatus(code = HttpStatus.CREATED)
-    public BookCsvDto addBook(@RequestBody BookCsvDto bookDto) {
-        books.add(bookDto);
-        return bookDto;
-    }
-
+//    @PostMapping(path = "/insert-book")
+//    @ResponseStatus(code = HttpStatus.CREATED)
+//    public BookCsvDto addBook(@RequestBody BookCsvDto bookDto) {
+//        books.add(bookDto);
+//        return bookDto;
+//    }
+    // books/file
     @PostMapping(path = "/upload-file",consumes = {"multipart/form-data"})
     @SneakyThrows
     public ResponseEntity<?> uploadBookStore(@RequestPart("file") MultipartFile file){
@@ -67,6 +68,12 @@ public class ApplicationController {
             return  ResponseEntity.status(HttpStatus.NO_CONTENT).body("Book not found\n");
         }
         return ResponseEntity.ok(updatedBook.getBookId() + " book's rating was updated successfully");
+    }
+
+    @PostMapping(path = "/upload_image")
+    public ResponseEntity<?> uploadImg() {
+        bookService.uploadImg();
+        return ResponseEntity.ok( " images was updated successfully");
     }
 
 }

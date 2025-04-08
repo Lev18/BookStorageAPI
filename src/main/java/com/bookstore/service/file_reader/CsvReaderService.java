@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CsvReaderService {
     @Autowired
-    FileRepository fileRepository;
+    private FileRepository fileRepository;
 
     public  List<BookCsvDto>  uploadBooks(MultipartFile file) throws IOException, NoSuchAlgorithmException {
         String hash = HashUtils.computeSHA256(file);
@@ -34,10 +34,10 @@ public class CsvReaderService {
 
         FileHash fileHash = new FileHash(hash);
         List<BookCsvDto> books = parseCsv(file);
-         fileRepository.save(fileHash);
+        fileRepository.save(fileHash);
         return books;
     }
-
+//TODO:create my own exception
     private List<BookCsvDto> parseCsv(MultipartFile file) throws IOException {
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))){
             HeaderColumnNameMappingStrategy<BookCsvDto> strategy = new HeaderColumnNameMappingStrategy<>();
@@ -47,10 +47,11 @@ public class CsvReaderService {
                             .replaceAll("\\\\\"", "\"")  // Replace \" with "
                             .replaceAll("\"\"", "\\\\\"\\\\\"")
                     )
-                    .collect(Collectors.toUnmodifiableList());
+                    .toList();
 
 
-            CsvToBean<BookCsvDto> csvDtos = new CsvToBeanBuilder<BookCsvDto>( new StringReader(String.join("\n",cleanedLine)))
+            CsvToBean<BookCsvDto> csvDtos = new CsvToBeanBuilder<BookCsvDto>(
+                    new StringReader(String.join("\n",cleanedLine)))
                     .withMappingStrategy(strategy)
                     .withSeparator(',')
                     .withIgnoreLeadingWhiteSpace(true)

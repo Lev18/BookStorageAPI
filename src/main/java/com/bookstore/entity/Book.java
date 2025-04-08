@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 public class Book {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,7 +33,7 @@ public class Book {
 
     @Column(name = "language", nullable = false)
     public String language;
-
+    //TODO: make unique
     @Column(name = "isbn", nullable = false)
     public String isbn;
 
@@ -69,28 +70,27 @@ public class Book {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = true)
     Author author;
-   
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "format_id") 
+    @JoinColumn(name = "format_id")
     Format format;
- 
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "publisher_id") 
+    @JoinColumn(name = "publisher_id")
     Publisher publisher;
 
-    @OneToMany(mappedBy="book")
+    @OneToMany(mappedBy = "book")
     List<Awards> awards;
 
     @OneToMany(mappedBy = "book")
     List<Characters> characters;
 
-
-    @OneToMany(mappedBy="book")
+    @OneToMany(mappedBy = "book")
     List<BookGenre> genres;
 
-    @OneToMany(mappedBy="book")
+    @OneToMany(mappedBy = "book")
     List<BookSetting> settings;
 
-    @OneToMany(mappedBy="ratingStars")
+    @OneToMany(mappedBy = "ratingStars")
     List<RatingByStars> stars;
 }
