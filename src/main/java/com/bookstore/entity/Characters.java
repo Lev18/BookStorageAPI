@@ -1,4 +1,4 @@
-package com.bookstore.Model;
+package com.bookstore.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,5 +20,5 @@ public class Characters {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
-    Book book;
+    private Book book;
 }

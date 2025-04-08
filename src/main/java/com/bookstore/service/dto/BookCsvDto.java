@@ -1,4 +1,4 @@
-package com.bookstore.Service.dto;
+package com.bookstore.service.dto;
 
 
 import com.bookstore.utils.StringToListConverter;
@@ -16,57 +16,79 @@ import java.util.List;
 public class BookCsvDto {
 
     @CsvBindByName(column = "bookId")
-    public String bookId;
+    private String bookId;
 
     @CsvBindByName(column = "title")
-    public String title;
+    private String title;
 
     @CsvBindByName(column = "series")
-    public String series;
+    private String series;
+
     @CsvBindByName(column = "author")
-    public String author;
+    private String author;
+
     @CsvBindByName(column = "rating")
-    public String rating;
+    private String rating;
+
     @CsvBindByName(column = "description")
-    public String description;
+    private String description;
+
     @CsvBindByName(column = "language")
-    public String language;
+    private String language;
+
     @CsvBindByName(column = "isbn")
-    public String isbn;
+    private String isbn;
+
     @CsvCustomBindByName(column = "genres", converter = StringToListConverter.class)
-    public List<String> genres;
+    private List<String> genres;
+
     @CsvCustomBindByName(column = "characters", converter = StringToListConverter.class)
-    public List<String> characters;
+    private List<String> characters;
+
     @CsvBindByName(column = "bookFormat")
-    public String bookFormat;
+    private String bookFormat;
+
     @CsvBindByName(column = "edition")
-    public String edition;
+    private String edition;
+
     @CsvBindByName(column = "pages")
-    public String pages;
+    private String pages;
+
     @CsvBindByName(column = "publisher")
-    public String publisher;
+    private String publisher;
+
     @CsvBindByName(column = "publishDate")
-    public String publishDate;
+    private String publishDate;
+
     @CsvBindByName(column = "firstPublishDate")
-    public String firstPublishDate;
+    private String firstPublishDate;
+
     @CsvCustomBindByName(column = "awards", converter = StringToListConverter.class)
-    public List<String> awards;
+    private List<String> awards;
+
     @CsvBindByName(column = "numRatings")
-    public Integer numRatings;
+    private Integer numRatings;
+
     @CsvCustomBindByName(column = "ratingsByStars", converter = StringToListConverter.class)
-    public List<String> ratingsByStars;
+    private List<String> ratingsByStars;
+
     @CsvBindByName(column = "likedPercent")
-    public String likedPercent;
+    private String likedPercent;
+
     @CsvCustomBindByName(column = "setting",converter = StringToListConverter.class)
-    public List<String> setting;
+    private List<String> setting;
+
     @CsvBindByName(column = "coverImg")
-    public String coverImg;
+    private String coverImg;
+
     @CsvBindByName(column = "bbeScore")
-    public String bbeScore;
+    private String bbeScore;
+
     @CsvBindByName(column = "bbeVotes")
-    public String bbeVotes;
+    private String bbeVotes;
+
     @CsvBindByName(column = "price")
-    public String price;
+    private String price;
 
     @Override
     public String toString() {

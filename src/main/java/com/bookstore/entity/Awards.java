@@ -1,8 +1,7 @@
 // many to one
-package com.bookstore.Model;
+package com.bookstore.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
 import lombok.Setter;
 
 @Entity
@@ -18,6 +17,6 @@ public class Awards {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
-    Book book;
+    private Book book;
 
 }

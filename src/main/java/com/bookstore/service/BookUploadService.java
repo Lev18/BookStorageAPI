@@ -4,6 +4,7 @@ import com.bookstore.entity.*;
 import com.bookstore.repository.*;
 import com.bookstore.service.dto.BookCsvDto;
 import com.bookstore.service.mapper.BookDtoToBookDBMapper;
+import com.bookstore.service.mapper.BookToAuthorMapper;
 import com.bookstore.service.mapper.BookToGenreMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -16,11 +17,13 @@ import java.util.Set;
 // handle preloading of the same elements of
 @Component("appServiceImpl")
 @AllArgsConstructor
-public class ApplicationServiceImpl implements ApplicationService{
+public class BookUploadService {
 
     private final BookDtoToBookDBMapper bookDtoToBookDBMapper;
     private final BookToGenreMapper bookToGenreMapper;
+    private final BookToAuthorMapper bookToAuthorMapper;
     private final BookRepository bookRepository;
+    private final AuthorRepository authorRepository;
     private final AwardsRepository awardsRepository;
     private final CharactersRepository charactersRepository;
     private final BookGenreRepository bookGenreRepository;
@@ -29,24 +32,41 @@ public class ApplicationServiceImpl implements ApplicationService{
 
     @Transactional
     public int saveBook(List<BookCsvDto> bookCsvDtos) {
+
         List<Book> allBooks = new ArrayList<>();
         List<BookGenre> allBookGenres = new ArrayList<>();
+
+        List<Author> allNewAuthors = new ArrayList<>();
+        List<Genre> allNewGenre = new ArrayList<>();
+        List<BookAuthor> allNewBookAuthor = new ArrayList<>();
+
         Set<Awards> allAwards = new HashSet<>();
         Set<RatingByStars> ratingByStars = new HashSet<>();
         Set<Characters> allCharacters = new HashSet<>();
-        Set<Genre> allGenres = new HashSet<>();
+
+        Set<Author> allAuthorsInDb = new HashSet<>(authorRepository.findAll());
+        Set<Genre> allGenresInDb = new HashSet<>(genreRepository.findAll());
 
         for (BookCsvDto bookCsvDto : bookCsvDtos) {
-//            ImageLoader.uploadImage(bookCsvDto.getCoverImg());
             Book book = bookDtoToBookDBMapper.bookToAwardMapper(bookCsvDto);
             allBooks.add(book);
             allAwards.addAll(book.getAwards());
             ratingByStars.addAll(book.getStars());
             allCharacters.addAll(book.getCharacters());
-            // TODO: how collect genres into set
-            // Optimize genre creation process to not query database for each book genres
-            List<Genre> bookGenres = bookToGenreMapper.findOrCreateGenre(bookCsvDto, genreRepository);
-            allGenres.addAll(bookGenres);
+
+            List<Author> bookAuthors = bookToAuthorMapper.bookToAuthorMapper(bookCsvDto, allAuthorsInDb);
+            allNewAuthors.addAll(bookAuthors);
+
+            for (Author author : bookAuthors) {
+                BookAuthor bookAuthor = new BookAuthor();
+                bookAuthor.setAuthor(author);
+                bookAuthor.setBook(book);
+                allNewBookAuthor.add(bookAuthor);
+            }
+
+            List<Genre> bookGenres = bookToGenreMapper.findOrCreateGenre(bookCsvDto, allGenresInDb);
+            allNewGenre.addAll(bookGenres);
+
             for (Genre genre : bookGenres) {
                 BookGenre bookGenre = new BookGenre();
                 bookGenre.setBook(book);
@@ -56,11 +76,17 @@ public class ApplicationServiceImpl implements ApplicationService{
         }
 
         bookGenreRepository.saveAll(allBookGenres);
-        genreRepository.saveAll(allGenres);
+        genreRepository.saveAll(new ArrayList<>(allNewGenre));
+        authorRepository.saveAll(new ArrayList<>(allNewAuthors));
         bookRepository.saveAll(allBooks);
         awardsRepository.saveAll(allAwards);
         ratingByStarsRepository.saveAll(ratingByStars);
         charactersRepository.saveAll(allCharacters);
+
+        allNewAuthors.clear();
+        allNewGenre.clear();
+        allBookGenres.clear();
+        allNewAuthors.clear();
 
         return bookCsvDtos.size();
     }

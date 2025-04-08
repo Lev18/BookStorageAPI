@@ -1,63 +1,47 @@
-package com.bookstore.Controller;
+package com.bookstore.controller;
 
-import com.bookstore.Model.Book;
-import com.bookstore.Service.ApplicationService;
-import com.bookstore.Service.ApplicationServiceImpl;
-import com.bookstore.Service.BookService;
-import com.bookstore.Service.FileReader.CsvReaderService;
-import com.bookstore.Service.dto.BookCsvDto;
-import jakarta.annotation.Resource;
+import com.bookstore.entity.Book;
+import com.bookstore.service.BookService;
+import com.bookstore.service.BookUploadService;
+import com.bookstore.service.file_reader.CsvReaderService;
+import com.bookstore.service.dto.BookCsvDto;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.http.HttpStatus;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api")
+
 //TODO change class name
+// refactor uploadBookStore method
 @AllArgsConstructor
 public class ApplicationController {
     private final CsvReaderService csvReaderService;
-    @Autowired
-    @Qualifier("appServiceImpl")
-    private  ApplicationService applicationService;
-    @Autowired
-    private BookService bookService;
-
-    public ApplicationController(CsvReaderService csvReaderService) {
-        this.csvReaderService = csvReaderService;
-    }
+    private final BookUploadService bookUploadService;
+    private final BookService bookService;
 
     @GetMapping
-    public String front (){
+    public String front() {
         return "Welcome";
     }
 
-//    @PostMapping(path = "/insert-book")
-//    @ResponseStatus(code = HttpStatus.CREATED)
-//    public BookCsvDto addBook(@RequestBody BookCsvDto bookDto) {
-//        books.add(bookDto);
-//        return bookDto;
-//    }
     // books/file
-    @PostMapping(path = "/upload-file",consumes = {"multipart/form-data"})
+    @PostMapping(path = "/book/file", consumes = {"multipart/form-data"})
     @SneakyThrows
-    public ResponseEntity<?> uploadBookStore(@RequestPart("file") MultipartFile file){
+    public ResponseEntity<?> uploadBookStore(@RequestPart("file") MultipartFile file) {
+        //TODO move to BookUploadService class
         List<BookCsvDto> csvDTos = csvReaderService.uploadBooks(file);
         if (csvDTos.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("File already parsed NO new book");
         }
-        int savedBook = applicationService.saveBook(csvDTos);
+        int savedBook = bookUploadService.saveBook(csvDTos);
         return ResponseEntity.ok(savedBook + " new book were added\n");
     }
 
@@ -65,7 +49,7 @@ public class ApplicationController {
     public ResponseEntity<?> updateBookRating(@PathVariable String book_id, @PathVariable String newRate) {
         Book updatedBook = bookService.updateBookRating(book_id, newRate);
         if (updatedBook == null) {
-            return  ResponseEntity.status(HttpStatus.NO_CONTENT).body("Book not found\n");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Book not found\n");
         }
         return ResponseEntity.ok(updatedBook.getBookId() + " book's rating was updated successfully");
     }
@@ -73,7 +57,7 @@ public class ApplicationController {
     @PostMapping(path = "/upload_image")
     public ResponseEntity<?> uploadImg() {
         bookService.uploadImg();
-        return ResponseEntity.ok( " images was updated successfully");
+        return ResponseEntity.ok(" images was updated successfully");
     }
 
 }

@@ -1,11 +1,8 @@
-package com.bookstore.Service.mapper;
+package com.bookstore.service.mapper;
 
-import com.bookstore.Model.Awards;
-import com.bookstore.Model.Book;
-import com.bookstore.Repository.AwardsRepository;
-import com.bookstore.Service.dto.BookCsvDto;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.bookstore.entity.Awards;
+import com.bookstore.entity.Book;
+import com.bookstore.service.dto.BookCsvDto;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

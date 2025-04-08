@@ -1,9 +1,8 @@
-package com.bookstore.Service.mapper;
+package com.bookstore.service.mapper;
 
-import com.bookstore.Model.Awards;
-import com.bookstore.Model.Book;
-import com.bookstore.Model.RatingByStars;
-import com.bookstore.Service.dto.BookCsvDto;
+import com.bookstore.entity.Book;
+import com.bookstore.entity.RatingByStars;
+import com.bookstore.service.dto.BookCsvDto;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

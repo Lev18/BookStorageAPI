@@ -1,4 +1,4 @@
-package com.bookstore.Service.FileReader;
+package com.bookstore.service.file_reader;
 
 import jakarta.persistence.*;
 

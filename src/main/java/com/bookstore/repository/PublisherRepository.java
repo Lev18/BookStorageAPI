@@ -1,6 +1,6 @@
-package com.bookstore.Repository;
+package com.bookstore.repository;
 
-import com.bookstore.Model.Publisher;
+import com.bookstore.entity.Publisher;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,7 +1,7 @@
-package com.bookstore.Service.FileReader;
+package com.bookstore.service.file_reader;
 
-import com.bookstore.Repository.FileRepository;
-import com.bookstore.Service.dto.BookCsvDto;
+import com.bookstore.repository.FileRepository;
+import com.bookstore.service.dto.BookCsvDto;
 import com.bookstore.utils.HashUtils;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 public class CsvReaderService {
     @Autowired
     private FileRepository fileRepository;
-
+//TODO:create my own exception
     public  List<BookCsvDto>  uploadBooks(MultipartFile file) throws IOException, NoSuchAlgorithmException {
         String hash = HashUtils.computeSHA256(file);
         if ( fileRepository.existsByFileHash(hash)) {
@@ -37,18 +38,24 @@ public class CsvReaderService {
         fileRepository.save(fileHash);
         return books;
     }
+
 //TODO:create my own exception
     private List<BookCsvDto> parseCsv(MultipartFile file) throws IOException {
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))){
             HeaderColumnNameMappingStrategy<BookCsvDto> strategy = new HeaderColumnNameMappingStrategy<>();
             strategy.setType(BookCsvDto.class);
+            Pattern backslashQuote = Pattern.compile("\\\\\"");
+            Pattern doubleQuote = Pattern.compile("\"\"");
             List<String> cleanedLine = reader.lines()
-                    .map(line-> line
-                            .replaceAll("\\\\\"", "\"")  // Replace \" with "
-                            .replaceAll("\"\"", "\\\\\"\\\\\"")
+                    .map(line-> {
+                                String result = backslashQuote.matcher(line)
+                                                .replaceAll("\"");
+                                result = doubleQuote.matcher(result)
+                                        .replaceAll("\\\\\"\\\\\"");
+                                return  result;
+                            }
                     )
                     .toList();
-
 
             CsvToBean<BookCsvDto> csvDtos = new CsvToBeanBuilder<BookCsvDto>(
                     new StringReader(String.join("\n",cleanedLine)))

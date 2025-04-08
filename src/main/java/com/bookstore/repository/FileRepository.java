@@ -1,6 +1,6 @@
-package com.bookstore.Repository;
+package com.bookstore.repository;
 
-import com.bookstore.Service.FileReader.FileHash;
+import com.bookstore.service.file_reader.FileHash;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

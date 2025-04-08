@@ -1,27 +1,36 @@
-package com.bookstore.Service.mapper;
+package com.bookstore.service.mapper;
 
-import com.bookstore.Model.Author;
-import com.bookstore.Repository.AuthorRepository;
-import com.bookstore.Service.dto.BookCsvDto;
+import com.bookstore.entity.Author;
+import com.bookstore.repository.AuthorRepository;
+import com.bookstore.service.dto.BookCsvDto;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class BookToAuthorMapper {
-    // check in db no in memory
-    private Map<String, Author> authorCache = new HashMap<>();
-
-    public Author bookToAuthorMapper(BookCsvDto bookDto, AuthorRepository authorRepository) {
-        String bookFormat = bookDto.getBookFormat();
-        if (authorCache.containsKey(bookFormat)) {
-            return authorCache.get(bookFormat);
-        }
-
-        Author author = authorRepository.findByAuthorName(bookDto.getAuthor())
-                .orElseGet(()->authorRepository.save(new Author(bookDto.getAuthor())));
-        authorCache.put(bookFormat, author);
-        return author;
+    // check in db not in memory
+    public List<Author> bookToAuthorMapper(BookCsvDto bookDto, Set<Author> authorsInRepository) {
+        Pattern pattern = Pattern.compile("\\((.*?)\\)");
+        List<Author> authors = Arrays.stream(bookDto.getAuthor()
+                        .split(", "))
+                .map(authorName -> new Author(authorName))
+                .filter(author -> !authorsInRepository.contains(author))
+                .toList();
+        authorsInRepository.addAll(authors);
+        return authors;
+        //        List<String> roles = new ArrayList<>();
+//        Map<String, List<String>> authorsRole = new HashMap<>();
+//        for (String s : authors) {
+//            Matcher matcher = pattern.matcher(s);
+//            String[] author = s.split("\\(");
+//            while (matcher.find()) {
+//                roles.add(matcher.group(1).trim());
+//            }
+//            authorsRole.put(author[0].trim(),
+//                    new ArrayList<>(roles));
+//            roles.removeAll(roles);
     }
 }

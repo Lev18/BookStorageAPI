@@ -1,4 +1,4 @@
-package com.bookstore.Model;
+package com.bookstore.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -26,71 +26,70 @@ public class Book {
     private String series;
 
     @Column(name = "rating")
-    public String rating;
+    private String rating;
 
     @Column(length = 10485760, name = "description", nullable = false)
-    public String description;
+    private String description;
 
     @Column(name = "language", nullable = false)
-    public String language;
+    private String language;
     //TODO: make unique
-    @Column(name = "isbn", nullable = false)
-    public String isbn;
+    @Column(name = "isbn", nullable = false, unique = true  )
+    private String isbn;
 
     @Column(name = "edition")
-    public String edition;
+    private String edition;
 
     @Column(name = "pages", nullable = false)
-    public String pages;
+    private String pages;
 
     @Column(name = "publishDate", nullable = false)
-    public String publishDate;
+    private String publishDate;
 
     @Column(name = "firstPublishDate")
-    public String firstPublishDate;
+    private String firstPublishDate;
 
     @Column(name = "numRatings")
-    public Integer numRatings;
+    private Integer numRatings;
 
     @Column(name = "likedPercent")
-    public String likedPercent;
+    private String likedPercent;
 
     @Column(name = "coverImg")
-    public String coverImg;
+    private String coverImg;
 
     @Column(name = "bbeScore")
-    public String bbeScore;
+    private String bbeScore;
 
     @Column(name = "bbeVotes")
-    public String bbeVotes;
+    private String bbeVotes;
 
     @Column(name = "price")
-    public String price;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = true)
-    Author author;
+    private String price;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "format_id")
-    Format format;
+    private Format format;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publisher_id")
-    Publisher publisher;
+    private Publisher publisher;
 
     @OneToMany(mappedBy = "book")
-    List<Awards> awards;
+    private List<Awards> awards;
 
     @OneToMany(mappedBy = "book")
-    List<Characters> characters;
+    private List<Characters> characters;
 
     @OneToMany(mappedBy = "book")
-    List<BookGenre> genres;
+    private List<BookGenre> genres;
 
     @OneToMany(mappedBy = "book")
-    List<BookSetting> settings;
+    private List<BookSetting> settings;
 
     @OneToMany(mappedBy = "ratingStars")
-    List<RatingByStars> stars;
+    private List<RatingByStars> stars;
+
+    @OneToMany(mappedBy = "book")
+    private List<BookAuthor> author;
 }

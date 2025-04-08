@@ -1,8 +1,8 @@
-package com.bookstore.Service.mapper;
+package com.bookstore.service.mapper;
 
-import com.bookstore.Model.Publisher;
-import com.bookstore.Repository.PublisherRepository;
-import com.bookstore.Service.dto.BookCsvDto;
+import com.bookstore.entity.Publisher;
+import com.bookstore.repository.PublisherRepository;
+import com.bookstore.service.dto.BookCsvDto;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;

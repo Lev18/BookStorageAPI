@@ -1,8 +1,6 @@
-package com.bookstore.Model;
+package com.bookstore.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Table(name = "book_settings")
@@ -13,9 +11,9 @@ public class BookSetting {
  
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
-    Book book;
+    private Book book;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "setting_id")
-    Setting setting; 
+    private Setting setting; 
 }

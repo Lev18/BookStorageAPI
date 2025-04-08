@@ -1,4 +1,4 @@
-package com.bookstore.Model;
+package com.bookstore.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,7 +19,7 @@ public class Publisher {
     
     @OneToMany(mappedBy = "publisher")
     List<Book> books;
-    public Publisher(){}
+    private Publisher(){}
 
     public Publisher(String publisherName) {
         this.publisherName = publisherName;

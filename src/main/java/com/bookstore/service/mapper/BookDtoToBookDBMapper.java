@@ -1,16 +1,11 @@
-package com.bookstore.Service.mapper;
+package com.bookstore.service.mapper;
 
-import com.bookstore.Model.Book;
-import com.bookstore.Model.Format;
-import com.bookstore.Repository.*;
-import com.bookstore.Service.dto.BookCsvDto;
-import jakarta.persistence.Column;
+import com.bookstore.entity.Book;
+import com.bookstore.repository.*;
+import com.bookstore.service.dto.BookCsvDto;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 @Transactional
@@ -60,7 +55,6 @@ public class BookDtoToBookDBMapper {
             book.setStars(ratingMapper.bookToRatingsMapper(bookDto, book));
             book.setCharacters(characterMapper.mapBookDtoToCharacter(bookDto, book));
             book.setFormat(bookDtoFormatMapper.mapBookToFormat(bookDto, formatRepository));
-            book.setAuthor(bookToAuthorMapper.bookToAuthorMapper(bookDto, authorRepository));
             book.setPublisher(bookDtoToPublisherMapper.bookToPublisherMapper(bookDto, publisherRepository));
 
         return book;

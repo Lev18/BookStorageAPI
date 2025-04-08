@@ -1,8 +1,6 @@
-package com.bookstore.Model;
+package com.bookstore.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
 
@@ -17,5 +15,5 @@ public class Setting {
     private String setting;
     
     @OneToMany(mappedBy="setting")
-    List<BookSetting> settings;    
+    private List<BookSetting> settings;    
 }

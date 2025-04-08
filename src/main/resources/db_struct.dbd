@@ -126,3 +126,21 @@ Ref: publisher.id < book.publsher_id
 
 // Ref: users.id < follows.followed_user_id
 
+
+author refactor to many to many
+numRating move to
+how make series unique 
+publisher make many to many
+language create enum
+separate awards from years and book(many to many)
+liked percent is static we can calculate dynamically
+setting 
+change package names to lower case
+Pattern.compile 
+
+
+
+
+
+
+

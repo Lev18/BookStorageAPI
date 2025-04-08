@@ -1,7 +1,7 @@
-package com.bookstore.Service;
+package com.bookstore.service;
 
-import com.bookstore.Model.Book;
-import com.bookstore.Repository.BookRepository;
+import com.bookstore.entity.Book;
+import com.bookstore.repository.BookRepository;
 import com.bookstore.utils.imageLoader.ImageLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,3 +29,8 @@ public class BookService {
     }
 
 }
+
+
+
+
+

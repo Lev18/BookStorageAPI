@@ -1,23 +1,26 @@
-package com.bookstore.Service.mapper;
+package com.bookstore.service.mapper;
 
-import com.bookstore.Model.Genre;
-import com.bookstore.Repository.GenreRepository;
-import com.bookstore.Service.dto.BookCsvDto;
+import com.bookstore.entity.Genre;
+import com.bookstore.repository.GenreRepository;
+import com.bookstore.service.dto.BookCsvDto;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class BookToGenreMapper {
 
-    public List<Genre> findOrCreateGenre(BookCsvDto bookCsvDto, GenreRepository genreRepository) {
+    public List<Genre> findOrCreateGenre(BookCsvDto bookCsvDto, Set<Genre> genresInRepository) {
         List<Genre> genres = new ArrayList<>();
-        for (String title : bookCsvDto.getGenres()) {
-            Genre genre = genreRepository.findByGenreTitle(title)
-                    .orElseGet(()-> new Genre(title));
-            genres.add(genre);
+        for (String genre : bookCsvDto.getGenres()) {
+            Genre newgenre = new Genre(genre);
+            if (!genresInRepository.contains(newgenre)) {
+                genres.add(newgenre);
+            }
         }
+        genresInRepository.addAll(genres);
         return genres;
     }
 }

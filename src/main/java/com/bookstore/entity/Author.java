@@ -1,11 +1,16 @@
-package com.bookstore.Model;
+package com.bookstore.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "authors")
+@Getter
+@Setter
 public class Author {
 
     @Id
@@ -16,12 +21,25 @@ public class Author {
     private String authorName;
 
     @OneToMany(mappedBy = "author")
-    List<Book> books;
+    private List<BookAuthor> books;
 
     public Author() {
     }
 
     public Author(String author) {
         this.authorName=author;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return  true;
+        if (obj == null || getClass() !=obj.getClass()) return  false;
+        Author author = (Author) obj;
+        return Objects.equals(this.authorName, author.authorName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(authorName);
     }
 }
