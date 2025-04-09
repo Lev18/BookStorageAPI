@@ -23,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 // refactor uploadBookStore method
 @AllArgsConstructor
 public class ApplicationController {
-    private final CsvReaderService csvReaderService;
     private final BookUploadService bookUploadService;
     private final BookService bookService;
 
@@ -32,17 +31,10 @@ public class ApplicationController {
         return "Welcome";
     }
 
-    // books/file
     @PostMapping(path = "/book/file", consumes = {"multipart/form-data"})
     @SneakyThrows
     public ResponseEntity<?> uploadBookStore(@RequestPart("file") MultipartFile file) {
-        //TODO move to BookUploadService class
-        List<BookCsvDto> csvDTos = csvReaderService.uploadBooks(file);
-        if (csvDTos.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("File already parsed NO new book");
-        }
-        int savedBook = bookUploadService.saveBook(csvDTos);
-        return ResponseEntity.ok(savedBook + " new book were added\n");
+        return bookUploadService.uploadAndSaveFile(file);
     }
 
     @PutMapping(path = "/updateRating/{book_id}/{newRate}")
@@ -54,7 +46,7 @@ public class ApplicationController {
         return ResponseEntity.ok(updatedBook.getBookId() + " book's rating was updated successfully");
     }
 
-    @PostMapping(path = "/upload_image")
+    @PostMapping(path = "/upload/image")
     public ResponseEntity<?> uploadImg() {
         bookService.uploadImg();
         return ResponseEntity.ok(" images was updated successfully");

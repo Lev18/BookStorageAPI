@@ -8,7 +8,6 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,13 +17,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-
-
 @Service
 @RequiredArgsConstructor
 public class CsvReaderService {
-    @Autowired
-    private FileRepository fileRepository;
+    private final FileRepository fileRepository;
 //TODO:create my own exception
     public  List<BookCsvDto>  uploadBooks(MultipartFile file) throws IOException, NoSuchAlgorithmException {
         String hash = HashUtils.computeSHA256(file);
