@@ -1,24 +1,45 @@
 package com.bookstore.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "characters")
-@Setter
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+@Setter
 public class Characters {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "char_name")
-    private String charName; 
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    private Book book;
+    @Column(name = "character_name")
+    private String characterName;
+
+    @OneToMany(mappedBy = "character")
+    private List<BookCharacter> bookCharacters;
+
+    public Characters() {
+    }
+
+    public Characters(String character) {
+        this.characterName= character;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return  true;
+        if (obj == null || getClass() !=obj.getClass()) return  false;
+        Characters character = (Characters) obj;
+        return Objects.equals(this.characterName, character.characterName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(characterName.trim());
+    }
 }

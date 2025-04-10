@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.lang.Character;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
@@ -28,6 +29,8 @@ public class BookUploadService {
     private final BookDtoToFormatMapper bookDtoToFormatMapper;
     private final BookDtoToAwardMapper bookDtoToAwardMapper;
     private final BookToPublisherMapper bookDtoToPublisherMapper;
+    private final BookDtoToCharacterMapper characterMapper;
+
 
     private final BookRepository bookRepository;
 
@@ -37,12 +40,13 @@ public class BookUploadService {
     private final AwardsRepository awardsRepository;
     private final BookAwardRepository bookAwardRepository;
 
-    private final CharactersRepository charactersRepository;
+    private final BookCharactersRepository bookCharacterRepository;
     private final BookGenreRepository bookGenreRepository;
     private final GenreRepository genreRepository;
     private final FormatRepository formatRepository;
     private final RatingByStarsRepository ratingByStarsRepository;
     private final BookFormatRepository bookFormatRepository;
+    private final CharactersRepository charactersRepository;
     private final PublisherRepository publisherRepository;
 
 
@@ -55,13 +59,15 @@ public class BookUploadService {
             List<BookFormat> allNewBookFormat = new ArrayList<>();
             List<BookAward> allNewBookAward = new ArrayList<>();
             List<Publisher> newPublishers  = new ArrayList<>();
+            List<BookCharacter> allNewBookCharacters = new ArrayList<>();
+
             Set<RatingByStars> ratingByStars = new HashSet<>();
-            Set<Characters> allCharacters = new HashSet<>();
 
             Set<Author> allAuthorsInDb = new HashSet<>(authorRepository.findAll());
             Set<Genre> allGenresInDb   = new HashSet<>(genreRepository.findAll());
             Set<Format> allFormatsInDb = new HashSet<>(formatRepository.findAll());
             Set<Award> allAwardsInDb   = new HashSet<>(awardsRepository.findAll());
+            Set<Characters> allCharactersInDb   = new HashSet<>(charactersRepository.findAll());
             Set<String> uniqueIsbn = new HashSet<>(bookRepository.getAllISBNs());
             Set<Publisher> publishers = new HashSet<>(publisherRepository.findAll());
 
@@ -75,7 +81,6 @@ public class BookUploadService {
                                                             publishers, newPublishers));
                 allBooks.add(book);
                 ratingByStars.addAll(book.getStars());
-                allCharacters.addAll(book.getCharacters());
                 uniqueIsbn.add(bookCsvDto.getIsbn());
 
                 //TODO:refactor to separate function
@@ -107,13 +112,20 @@ public class BookUploadService {
                 }
 
                 Map<String, Award> allAwards = bookDtoToAwardMapper.bookToAwardMapper(bookCsvDto, allAwardsInDb);
-
                 for (Map.Entry<String, Award> entry : allAwards.entrySet()) {
                     BookAward bookAward = new BookAward();
                     bookAward.setAward(entry.getValue());
                     bookAward.setBook(book);
                     bookAward.setBookAward(entry.getKey());
                     allNewBookAward.add(bookAward);
+                }
+
+                List<Characters> allNewCharacters = characterMapper.mapBookDtoToCharacter(bookCsvDto, allCharactersInDb);
+                for (Characters character : allNewCharacters) {
+                    BookCharacter bookCharacter = new BookCharacter();
+                    bookCharacter.setBook(book);
+                    bookCharacter.setCharacter(character);
+                    allNewBookCharacters.add(bookCharacter);
                 }
 
             }
@@ -124,9 +136,10 @@ public class BookUploadService {
             bookAuthorRepository.saveAll(allNewBookAuthor);
             bookFormatRepository.saveAll(allNewBookFormat);
             bookAwardRepository.saveAll(allNewBookAward);
+            bookCharacterRepository.saveAll(allNewBookCharacters);
+
 
             ratingByStarsRepository.saveAll(ratingByStars);
-            charactersRepository.saveAll(allCharacters);
 
             allBookGenres.clear();
             allNewBookFormat.clear();
@@ -135,7 +148,7 @@ public class BookUploadService {
             allNewBookFormat.clear();
             allNewBookAward.clear();
             ratingByStars.clear();
-            allCharacters.clear();
+            allNewBookCharacters.clear();
 
             return bookCsvDtos.size();
         }

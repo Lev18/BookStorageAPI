@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class BookDtoToBookDBMapper {
     private final BookDtoToRatingsMapper ratingMapper;
-    private final BookDtoToCharacterMapper characterMapper;
-
 
     public Book bookDtoToBookMapper(BookCsvDto bookDto) {
             Book book = new Book();
@@ -37,7 +35,6 @@ public class BookDtoToBookDBMapper {
 
             //  relational databases configurations
             book.setStars(ratingMapper.bookToRatingsMapper(bookDto, book));
-            book.setCharacters(characterMapper.mapBookDtoToCharacter(bookDto, book));
 
         return book;
     }
