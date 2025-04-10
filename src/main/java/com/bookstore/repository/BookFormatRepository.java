@@ -1,11 +1,9 @@
 package com.bookstore.repository;
 
-import com.bookstore.entity.Publisher;
+import com.bookstore.entity.BookFormat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 @Repository
-public interface PublisherRepository extends JpaRepository<Publisher, Long> {
+public interface BookFormatRepository extends JpaRepository<BookFormat, Long> {
 }

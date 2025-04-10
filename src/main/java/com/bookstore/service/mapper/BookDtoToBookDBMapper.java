@@ -1,43 +1,28 @@
 package com.bookstore.service.mapper;
 
 import com.bookstore.entity.Book;
-import com.bookstore.repository.*;
 import com.bookstore.service.dto.BookCsvDto;
+import com.bookstore.service.enums.Language;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @Transactional
+@RequiredArgsConstructor
 public class BookDtoToBookDBMapper {
-    @Autowired
-    BookDtoToAwardMapper awardMapper;
-    @Autowired
-    BookDtoToRatingsMapper ratingMapper;
-    @Autowired
-    BookDtoToCharacterMapper characterMapper;
-    @Autowired
-    BookDtoToFormatMapper bookDtoFormatMapper;
-    @Autowired
-    FormatRepository formatRepository;
-    @Autowired
-    BookToAuthorMapper bookToAuthorMapper;
-    @Autowired
-    AuthorRepository authorRepository;
-    @Autowired
-    BookToPublisherMapper bookDtoToPublisherMapper;
-    @Autowired
-    PublisherRepository publisherRepository;
+    private final BookDtoToRatingsMapper ratingMapper;
+    private final BookDtoToCharacterMapper characterMapper;
 
 
-    public Book bookToAwardMapper(BookCsvDto bookDto) {
+    public Book bookDtoToBookMapper(BookCsvDto bookDto) {
             Book book = new Book();
             book.setBookId(bookDto.getBookId());
             book.setTitle(bookDto.getTitle());
             book.setSeries(bookDto.getSeries());
             book.setRating(bookDto.getRating());
             book.setDescription(bookDto.getDescription());
-            book.setLanguage(bookDto.getLanguage());
+            book.setLanguage(Language.fromLanguageName(bookDto.getLanguage()));
             book.setIsbn(bookDto.getIsbn());
             book.setEdition(bookDto.getEdition());
             book.setPages(bookDto.getPages());
@@ -51,11 +36,8 @@ public class BookDtoToBookDBMapper {
             book.setPrice(bookDto.getPrice());
 
             //  relational databases configurations
-            book.setAwards(awardMapper.bookToAwardMapper(bookDto, book));
             book.setStars(ratingMapper.bookToRatingsMapper(bookDto, book));
             book.setCharacters(characterMapper.mapBookDtoToCharacter(bookDto, book));
-            book.setFormat(bookDtoFormatMapper.mapBookToFormat(bookDto, formatRepository));
-            book.setPublisher(bookDtoToPublisherMapper.bookToPublisherMapper(bookDto, publisherRepository));
 
         return book;
     }

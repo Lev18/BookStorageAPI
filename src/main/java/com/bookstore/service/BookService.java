@@ -3,15 +3,16 @@ package com.bookstore.service;
 import com.bookstore.entity.Book;
 import com.bookstore.repository.BookRepository;
 import com.bookstore.utils.imageLoader.ImageLoader;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class BookService {
-    @Autowired
-    BookRepository bookRepository;
+    private final BookRepository bookRepository;
     public Book updateBookRating(String bookId, String newRate) {
         Book book = bookRepository.findBookByBookId(bookId);
         if (book != null) {

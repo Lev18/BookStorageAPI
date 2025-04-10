@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface FormatRepository extends JpaRepository<Format, String> {
-    Optional<Format> findByBookFormat(String format);
+   // Optional<Format> findByBookFormat(String format);
 }

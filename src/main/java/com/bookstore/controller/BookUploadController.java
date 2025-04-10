@@ -3,8 +3,6 @@ package com.bookstore.controller;
 import com.bookstore.entity.Book;
 import com.bookstore.service.BookService;
 import com.bookstore.service.BookUploadService;
-import com.bookstore.service.file_reader.CsvReaderService;
-import com.bookstore.service.dto.BookCsvDto;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
@@ -12,17 +10,12 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.http.HttpStatus;
 
-import java.util.List;
-
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api")
-
-//TODO change class name
-// refactor uploadBookStore method
 @AllArgsConstructor
-public class ApplicationController {
+public class BookUploadController {
     private final BookUploadService bookUploadService;
     private final BookService bookService;
 

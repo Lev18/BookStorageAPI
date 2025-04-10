@@ -2,44 +2,40 @@ package com.bookstore.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "authors")
-@Getter
+@Table(name = "awards")
 @Setter
-public class Author {
-
+@Getter
+@NoArgsConstructor
+public class Award {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "author_name")
-    private String authorName;
+    @Column(name = "award")
+    private String name;
 
-    @OneToMany(mappedBy = "author")
-    private List<BookAuthor> books;
+    @OneToMany(mappedBy = "award", fetch = FetchType.LAZY)
+    private List<BookAward> awards;
 
-    public Author() {
-    }
-
-    public Author(String author) {
-        this.authorName=author;
-    }
+    public Award(String award) {this.name = award;}
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return  true;
         if (obj == null || getClass() !=obj.getClass()) return  false;
-        Author author = (Author) obj;
-        return Objects.equals(this.authorName, author.authorName);
+        Award format = (Award) obj;
+        return Objects.equals(this.name, format.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(authorName.trim());
+        return Objects.hash(name.trim());
     }
 }

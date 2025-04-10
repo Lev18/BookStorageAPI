@@ -3,23 +3,47 @@ package com.bookstore.service.mapper;
 import com.bookstore.entity.Format;
 import com.bookstore.repository.FormatRepository;
 import com.bookstore.service.dto.BookCsvDto;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 @Component
+@AllArgsConstructor
 public class BookDtoToFormatMapper {
-    private Map<String, Format> formatCache = new HashMap<>();
-    public Format mapBookToFormat(BookCsvDto bookDto, FormatRepository formatRepositor ) {
-        String bookFormat = bookDto.getBookFormat();
-        if (formatCache.containsKey(bookFormat)) {
-            return formatCache.get(bookFormat);
+    private final FormatRepository formatRepository;
+
+    public List<Format> mapBookToFormat(BookCsvDto bookDto, Set<Format> formatsInDb) {
+        List<Format> formats = Arrays.stream(bookDto.getBookFormat()
+                        .split(", "))
+                .map(Format::new)
+                .toList();
+
+        List<Format> allFormats = new ArrayList<>();
+        List<Format> newFormats = new ArrayList<>();
+
+        for (Format format : formats) {
+            Format existFormat = formatsInDb.stream()
+                    .filter(format1 -> format1.equals(format))
+                    .findFirst()
+                    .orElse(null);
+            if (existFormat != null) {
+                allFormats.add(existFormat);
+            } else {
+                allFormats.add(format);
+                newFormats.add(format);
+            }
         }
 
-        Format format = formatRepositor.findByBookFormat(bookDto.getBookFormat())
-                .orElseGet(()->formatRepositor.save(new Format(bookDto.getBookFormat())));
-        formatCache.put(bookFormat, format);
-        return null;
+        if (!newFormats.isEmpty()) {
+            formatsInDb.addAll(newFormats);
+            formatRepository.saveAll(newFormats);
+        }
+
+        return allFormats;
+
     }
 }

@@ -1,5 +1,6 @@
 package com.bookstore.entity;
 
+import com.bookstore.service.enums.Language;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,9 +32,10 @@ public class Book {
     @Column(length = 10485760, name = "description", nullable = false)
     private String description;
 
-    @Column(name = "language", nullable = false)
-    private String language;
-    //TODO: make unique
+    @Enumerated(EnumType.STRING)
+    @Column(name = "language")
+    private Language language;
+
     @Column(name = "isbn", nullable = false, unique = true  )
     private String isbn;
 
@@ -68,15 +70,11 @@ public class Book {
     private String price;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "format_id")
-    private Format format;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publisher_id")
     private Publisher publisher;
 
     @OneToMany(mappedBy = "book")
-    private List<Awards> awards;
+    private List<BookAward> awards;
 
     @OneToMany(mappedBy = "book")
     private List<Characters> characters;
@@ -92,4 +90,7 @@ public class Book {
 
     @OneToMany(mappedBy = "book")
     private List<BookAuthor> author;
+
+    @OneToMany(mappedBy = "book")
+    private List<BookFormat> formats;
 }
