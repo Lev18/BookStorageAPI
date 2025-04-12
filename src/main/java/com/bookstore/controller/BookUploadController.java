@@ -24,8 +24,7 @@ public class BookUploadController {
         return "Welcome";
     }
 
-    @PostMapping(path = "/book/file", consumes = {"multipart/form-data"})
-    @SneakyThrows
+    @PostMapping(path = "/books/file", consumes = {"multipart/form-data"})
     public ResponseEntity<?> uploadBookStore(@RequestPart("file") MultipartFile file) {
         return bookUploadService.uploadAndSaveFile(file);
     }

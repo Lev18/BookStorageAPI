@@ -50,17 +50,34 @@ Table author {
   author_name varchar
 }
 
+Table book_author {
+  id integer [primary key]
+  book_id integer [not null]
+  author_id integer [not null]
+}
+
 Table format {
   id integer [primary key]
   book_format varchar
 }
 
-Table characters{
+Table book_format {
   id integer [primary key]
   book_id integer [not null]
+  format_id integer [not null]
+}
+
+Table characters{
+  id integer [primary key]
   charName varchar
 }
 
+
+Table book_character {
+  id integer [primary key]
+  book_id integer [not null]
+  character_id integer [not null]
+}
 
 Table publisher {
   id integer [primary key]
@@ -69,9 +86,16 @@ Table publisher {
 
 Table awards {
   id integer [primary key]
-  book_id integer [not null]
   award_title varchar
 }
+
+Table book_award {
+  id integer [primary key]
+  book_id integer [not null]
+  award_id integer [not null]
+  book_award_title varchar
+}
+
 
 Table genre {
   id integer [primary key]
@@ -84,7 +108,6 @@ Table book_genre {
   book_id integer [not null]
   genre_id integer [not null]
 }
-
 
 Table setting {
   id integer [primary key]
@@ -104,16 +127,26 @@ Table ratingsByStars {
   stars varchar
 }
 
-Ref: author.id < book.author_id 
-Ref: format.id < book.format_id 
+Ref: book.id < book_author.book_id
+Ref: author.id < book_author.author_id
 
-Ref: book.id < characters.book_id
-Ref: book.id < awards.book_id
+
+Ref: book.id < book_format.book_id
+Ref: format.id < book_format.format_id
+
+
+Ref: book.id < book_character.book_id
+Ref: characters.id < book_character.character_id
+
+Ref: book.id < book_award.book_id
+Ref: awards.id < book_award.award_id
+
 Ref: book.id < ratingsByStars.book_id
 
 
 Ref: book.id < book_genre.book_id
 Ref: genre.id < book_genre.genre_id
+
 Ref: book.id < book_setting.book_id
 Ref: setting.id < book_setting.setting_id
 
@@ -127,10 +160,12 @@ Ref: publisher.id < book.publsher_id
 // Ref: users.id < follows.followed_user_id
 
 
-numRating move to // make it dynamic don't keep in db
+numRating move to + // make it dynamic don't keep in db
 how make series unique // title + series is unique
 language create enum  +
-separate awards from years and book(many to many)
-liked percent is static we can calculate dynamically
-setting
+separate awards from years and book(many to many) +
+liked percent is static we can calculate dynamically +
 
+series should be separate table many to one
+keep only year in  bookaward table
+publisher many to many

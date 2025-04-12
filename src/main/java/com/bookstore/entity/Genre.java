@@ -13,7 +13,8 @@ import java.util.Objects;
 @Setter
 public class Genre {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "genre_seq")
+    @SequenceGenerator(name = "genre_seq", sequenceName = "genre_seq", allocationSize = 100)
     private Long id;
 
     @Column(name = "genres", nullable = false)

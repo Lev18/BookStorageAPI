@@ -1,12 +1,17 @@
 package com.bookstore.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "book_settings")
+@Getter
+@Setter
 public class BookSetting {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_setting_seq")
+    @SequenceGenerator(name = "book_setting_seq", sequenceName = "book_setting_seq", allocationSize = 100)
     private Long id;
  
     @ManyToOne(fetch = FetchType.LAZY)

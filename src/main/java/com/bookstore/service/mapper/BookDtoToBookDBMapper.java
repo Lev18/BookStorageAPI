@@ -26,7 +26,6 @@ public class BookDtoToBookDBMapper {
             book.setPages(bookDto.getPages());
             book.setPublishDate(bookDto.getPublishDate());
             book.setFirstPublishDate(bookDto.getFirstPublishDate());
-            book.setNumRatings(bookDto.getNumRatings());
             book.setLikedPercent(bookDto.getLikedPercent());
             book.setCoverImg(bookDto.getCoverImg());
             book.setBbeScore(bookDto.getBbeScore());
@@ -35,7 +34,8 @@ public class BookDtoToBookDBMapper {
 
             //  relational databases configurations
             book.setStars(ratingMapper.bookToRatingsMapper(bookDto, book));
+            book.setNumRatingByStars(book.getStars());
 
-        return book;
+            return book;
     }
 }

@@ -4,7 +4,7 @@ import com.bookstore.entity.*;
 import com.bookstore.repository.*;
 import com.bookstore.service.dto.BookCsvDto;
 import com.bookstore.service.exception.UnableParseFile;
-import com.bookstore.service.file_reader.CsvReaderService;
+import com.bookstore.service.fileReader.CsvReaderService;
 import com.bookstore.service.mapper.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -13,9 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.lang.Character;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 // handle preloading of the same elements of
@@ -30,16 +27,13 @@ public class BookUploadService {
     private final BookDtoToAwardMapper bookDtoToAwardMapper;
     private final BookToPublisherMapper bookDtoToPublisherMapper;
     private final BookDtoToCharacterMapper characterMapper;
-
+    private final BookDtoToSettingMapper bookDtoToSettingMapper;
 
     private final BookRepository bookRepository;
-
     private final AuthorRepository authorRepository;
     private final BookAuthorRepository bookAuthorRepository;
-
     private final AwardsRepository awardsRepository;
     private final BookAwardRepository bookAwardRepository;
-
     private final BookCharactersRepository bookCharacterRepository;
     private final BookGenreRepository bookGenreRepository;
     private final GenreRepository genreRepository;
@@ -48,120 +42,171 @@ public class BookUploadService {
     private final BookFormatRepository bookFormatRepository;
     private final CharactersRepository charactersRepository;
     private final PublisherRepository publisherRepository;
+    private final SettingRepository settingRepository;
+    private final BookSettingRepository bookSettingRepository;
 
 
     @Transactional
-        public int saveBook(List<BookCsvDto> bookCsvDtos) {
+    public int saveBook(List<BookCsvDto> bookCsvDtos) {
 
-            List<Book> allBooks = new ArrayList<>();
-            List<BookGenre> allBookGenres = new ArrayList<>();
-            List<BookAuthor> allNewBookAuthor = new ArrayList<>();
-            List<BookFormat> allNewBookFormat = new ArrayList<>();
-            List<BookAward> allNewBookAward = new ArrayList<>();
-            List<Publisher> newPublishers  = new ArrayList<>();
-            List<BookCharacter> allNewBookCharacters = new ArrayList<>();
+        List<Book> allBooks = new ArrayList<>();
+        List<BookGenre> allBookGenres = new ArrayList<>();
+        List<BookAuthor> allNewBookAuthor = new ArrayList<>();
+        List<BookFormat> allNewBookFormat = new ArrayList<>();
+        List<BookAward> allNewBookAward = new ArrayList<>();
+        List<Publisher> newPublishers = new ArrayList<>();
+        List<BookCharacter> allNewBookCharacters = new ArrayList<>();
+        List<Genre> allNewGenres = new ArrayList<>();
+        List<Format> allNewFormats = new ArrayList<>();
+        List<Author> allNewAuthors = new ArrayList<>();
+        List<Award> allNewAwards = new ArrayList<>();
+        List<Setting> allNewSettings = new ArrayList<>();
 
-            Set<RatingByStars> ratingByStars = new HashSet<>();
+        List<BookSetting> allNewBookSettings = new ArrayList<>();
 
-            Set<Author> allAuthorsInDb = new HashSet<>(authorRepository.findAll());
-            Set<Genre> allGenresInDb   = new HashSet<>(genreRepository.findAll());
-            Set<Format> allFormatsInDb = new HashSet<>(formatRepository.findAll());
-            Set<Award> allAwardsInDb   = new HashSet<>(awardsRepository.findAll());
-            Set<Characters> allCharactersInDb   = new HashSet<>(charactersRepository.findAll());
-            Set<String> uniqueIsbn = new HashSet<>(bookRepository.getAllISBNs());
-            Set<Publisher> publishers = new HashSet<>(publisherRepository.findAll());
+        Set<RatingByStars> ratingByStars = new HashSet<>();
 
-            for (BookCsvDto bookCsvDto : bookCsvDtos) {
-                if (uniqueIsbn.contains(bookCsvDto.getIsbn())) {
-                    continue;
-                }
+        //TODO: create data structure similar to LRUCache to avoid from memory overflow
+        // search inside that cache, if cache miss request db
+        // this is temporary solution it also can cause memory overflow
 
-                Book book = bookDtoToBookDBMapper.bookDtoToBookMapper(bookCsvDto);
-                book.setPublisher(bookDtoToPublisherMapper.bookToPublisherMapper(bookCsvDto,
-                                                            publishers, newPublishers));
-                allBooks.add(book);
-                ratingByStars.addAll(book.getStars());
-                uniqueIsbn.add(bookCsvDto.getIsbn());
-
-                //TODO:refactor to separate function
-                List<Author> allNewAuthors = bookToAuthorMapper
-                                        .bookToAuthorMapper(bookCsvDto, allAuthorsInDb);
-                for (Author author : allNewAuthors) {
-                    BookAuthor bookAuthor = new BookAuthor();
-                    bookAuthor.setBook(book);
-                    bookAuthor.setAuthor(author);
-                    allNewBookAuthor.add(bookAuthor);
-                }
-
-                //TODO:refactor to separate function
-                List<Genre> allNewGenre = bookToGenreMapper
-                                        .findOrCreateGenre(bookCsvDto, allGenresInDb);
-                for (Genre genre : allNewGenre) {
-                    BookGenre bookGenre = new BookGenre();
-                    bookGenre.setBook(book);
-                    bookGenre.setGenre(genre);
-                    allBookGenres.add(bookGenre);
-                }
-
-                List<Format> allNewFormats = bookDtoToFormatMapper.mapBookToFormat(bookCsvDto, allFormatsInDb);
-                for (Format format : allNewFormats) {
-                    BookFormat bookFormat = new BookFormat();
-                    bookFormat.setBook(book);
-                    bookFormat.setFormat(format);
-                    allNewBookFormat.add(bookFormat);
-                }
-
-                Map<String, Award> allAwards = bookDtoToAwardMapper.bookToAwardMapper(bookCsvDto, allAwardsInDb);
-                for (Map.Entry<String, Award> entry : allAwards.entrySet()) {
-                    BookAward bookAward = new BookAward();
-                    bookAward.setAward(entry.getValue());
-                    bookAward.setBook(book);
-                    bookAward.setBookAward(entry.getKey());
-                    allNewBookAward.add(bookAward);
-                }
-
-                List<Characters> allNewCharacters = characterMapper.mapBookDtoToCharacter(bookCsvDto, allCharactersInDb);
-                for (Characters character : allNewCharacters) {
-                    BookCharacter bookCharacter = new BookCharacter();
-                    bookCharacter.setBook(book);
-                    bookCharacter.setCharacter(character);
-                    allNewBookCharacters.add(bookCharacter);
-                }
-
-            }
-            publisherRepository.saveAll(newPublishers);
-            bookRepository.saveAll(allBooks);
-
-            bookGenreRepository.saveAll(new ArrayList<>(allBookGenres));
-            bookAuthorRepository.saveAll(allNewBookAuthor);
-            bookFormatRepository.saveAll(allNewBookFormat);
-            bookAwardRepository.saveAll(allNewBookAward);
-            bookCharacterRepository.saveAll(allNewBookCharacters);
-
-
-            ratingByStarsRepository.saveAll(ratingByStars);
-
-            allBookGenres.clear();
-            allNewBookFormat.clear();
-            allBooks.clear();
-            allNewBookAuthor.clear();
-            allNewBookFormat.clear();
-            allNewBookAward.clear();
-            ratingByStars.clear();
-            allNewBookCharacters.clear();
-
-            return bookCsvDtos.size();
+        Map<String, Author> allExistingAuthors = new HashMap<>();
+        for (Author a : authorRepository.findAll()) {
+            allExistingAuthors.put(a.getAuthorName().toLowerCase(), a);
         }
 
+        Map<String, Award> allExistingAwards = new HashMap<>();
+        for (Award a : awardsRepository.findAll()) {
+            allExistingAwards.put(a.getName().toLowerCase(), a);
+        }
+
+        Map<String, Setting> allExistingSettings = new HashMap<>();
+        for (Setting a : settingRepository.findAll()) {
+            allExistingSettings.put(a.getSetting(), a);
+        }
+
+        Map<String, Genre> allExistingGenres = new HashMap<>();
+        for (Genre a : genreRepository.findAll()) {
+            allExistingGenres.put(a.getGenreTitle(), a);
+        }
+
+        Map<String, Format> allFormatExists = new HashMap<>();
+        for (Format a : formatRepository.findAll()) {
+            allFormatExists.put(a.getFormat(), a);
+        }
+        //renaming this variable name
+        Set<String> uniqueIsbn = new HashSet<>(bookRepository.getAllISBNs());
+        Set<Publisher> publishers = new HashSet<>(publisherRepository.findAll());
+
+        for (BookCsvDto bookCsvDto : bookCsvDtos) {
+            if (uniqueIsbn.contains(bookCsvDto.getIsbn())) {
+                // System.out.println("[INFO:] " + "\"\u001B[4m" + bookCsvDto.getTitle() + "\u001B[0m\" already exist or incorrect isbn series");
+                continue;
+            }
+
+            Book book = bookDtoToBookDBMapper.bookDtoToBookMapper(bookCsvDto);
+            //TODO: many to many
+            book.setPublisher(bookDtoToPublisherMapper.bookToPublisherMapper(bookCsvDto,
+                    publishers, newPublishers));
+            allBooks.add(book);
+            ratingByStars.addAll(book.getStars());
+            uniqueIsbn.add(bookCsvDto.getIsbn());
+
+            //TODO:refactor to separate function also inside mapper remove to other service
+            //
+            List<Author> allAuthors = bookToAuthorMapper
+                    .bookToAuthorMapper(bookCsvDto,
+                            allExistingAuthors,
+                            allNewAuthors);
+            for (Author author : allAuthors) {
+                BookAuthor bookAuthor = new BookAuthor();
+                bookAuthor.setBook(book);
+                bookAuthor.setAuthor(author);
+                allNewBookAuthor.add(bookAuthor);
+            }
+
+            //TODO:refactor to separate function
+            List<Genre> allGenre = bookToGenreMapper
+                    .findOrCreateGenre(bookCsvDto,
+                            allExistingGenres,
+                            allNewGenres);
+            for (Genre genre : allGenre) {
+                BookGenre bookGenre = new BookGenre();
+                bookGenre.setBook(book);
+                bookGenre.setGenre(genre);
+                allBookGenres.add(bookGenre);
+            }
+
+            List<Format> allFormats = bookDtoToFormatMapper
+                                .mapBookToFormat(bookCsvDto,
+                                        allFormatExists,
+                                        allNewFormats);
+            for (Format format : allFormats) {
+                BookFormat bookFormat = new BookFormat();
+                bookFormat.setBook(book);
+                bookFormat.setFormat(format);
+                allNewBookFormat.add(bookFormat);
+            }
+
+            Map<String, Award> allAwards = bookDtoToAwardMapper
+                    .bookToAwardMapper(bookCsvDto,
+                            allExistingAwards,
+                            allNewAwards);
+            for (Map.Entry<String, Award> entry : allAwards.entrySet()) {
+                BookAward bookAward = new BookAward();
+                bookAward.setAward(entry.getValue());
+                bookAward.setBook(book);
+                bookAward.setBookAward(entry.getKey());
+                allNewBookAward.add(bookAward);
+            }
+
+//            List<Characters> allNewCharacters = characterMapper
+//                    .mapBookDtoToCharacter(bookCsvDto, allCharactersInDb);
+//            for (Characters character : allNewCharacters) {
+//                BookCharacter bookCharacter = new BookCharacter();
+//                bookCharacter.setBook(book);
+//                bookCharacter.setCharacter(character);
+//                allNewBookCharacters.add(bookCharacter);
+//            }
+
+            List<Setting> allSettings = bookDtoToSettingMapper
+                            .mapBookDtoToSetting(bookCsvDto,
+                                    allExistingSettings,
+                                    allNewSettings);
+            for (Setting setting : allSettings) {
+                BookSetting bookSetting = new BookSetting();
+                bookSetting.setBook(book);
+                bookSetting.setSetting(setting);
+                allNewBookSettings.add(bookSetting);
+            }
+        }
+
+        publisherRepository.saveAll(newPublishers);
+        bookRepository.saveAll(allBooks);
+        genreRepository.saveAll(allNewGenres);
+        formatRepository.saveAll(allNewFormats);
+        authorRepository.saveAll(allNewAuthors);
+        awardsRepository.saveAll(allNewAwards);
+        settingRepository.saveAll(allNewSettings);
+
+        bookGenreRepository.saveAll(new ArrayList<>(allBookGenres));
+        bookAuthorRepository.saveAll(allNewBookAuthor);
+        bookFormatRepository.saveAll(allNewBookFormat);
+        bookAwardRepository.saveAll(allNewBookAward);
+        bookCharacterRepository.saveAll(allNewBookCharacters);
+        bookSettingRepository.saveAll(allNewBookSettings);
+
+        ratingByStarsRepository.saveAll(ratingByStars);
+
+
+        return allBooks.size();
+    }
+    // ResponseEntity<?> move to controller
     public ResponseEntity<?> uploadAndSaveFile(MultipartFile file) throws UnableParseFile {
-        try {
-            List<BookCsvDto> csvDTos = csvReaderService.uploadBooks(file);
-            if (csvDTos.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("File already parsed NO new book\n");
-            }
-            return ResponseEntity.ok(saveBook(csvDTos) + " new  books were saved\n");
-        } catch (NoSuchAlgorithmException | IOException e) {
-            throw new UnableParseFile("Unable to parse file due to "  + e.getCause());
+        List<BookCsvDto> csvDTos = csvReaderService.uploadBooks(file);
+        if (csvDTos.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("File already parsed NO new book\n");
         }
+        return ResponseEntity.ok(saveBook(csvDTos) + " new  books were saved\n");
     }
 }

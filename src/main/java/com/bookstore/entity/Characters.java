@@ -12,9 +12,9 @@ import java.util.Objects;
 @Getter
 @Setter
 public class Characters {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "character_seq")
+    @SequenceGenerator(name = "character_seq", sequenceName = "character_seq", allocationSize = 100)
     private Long id;
 
     @Column(name = "character_name")

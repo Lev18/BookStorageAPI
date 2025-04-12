@@ -13,6 +13,8 @@ import java.nio.file.StandardCopyOption;
 @Service
 public class ImageLoader {
     @Async
+    // avoid from static
+    // download and resize
     public static void uploadImage(String url) {
         if (!url.isEmpty() && !url.equals("")) {
             try (InputStream in =

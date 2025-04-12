@@ -14,7 +14,8 @@ import java.util.List;
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_seq")
+    @SequenceGenerator(name = "book_seq", sequenceName = "book_seq", allocationSize = 100)
     private Long id;
 
     @Column(name = "book_secId", nullable = false)
@@ -93,4 +94,14 @@ public class Book {
 
     @OneToMany(mappedBy = "book")
     private List<BookFormat> formats;
+
+    @OneToMany(mappedBy = "book")
+    private List<BookSetting> bookSettings;
+
+    public void setNumRatingByStars(List<RatingByStars> ratingByStars) {
+      this.numRatings = ratingByStars.stream()
+              .mapToInt(RatingByStars::getRatingStars)
+              .sum();
+    }
+
 }

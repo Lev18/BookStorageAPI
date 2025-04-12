@@ -6,41 +6,32 @@ import com.bookstore.service.dto.BookCsvDto;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 @AllArgsConstructor
 public class BookDtoToFormatMapper {
-    private final FormatRepository formatRepository;
+//    private final FormatRepository formatRepository;
 
-    public List<Format> mapBookToFormat(BookCsvDto bookDto, Set<Format> formatsInDb) {
+    public List<Format> mapBookToFormat(BookCsvDto bookDto,
+                                        Map<String, Format> allFormatExists,
+                                        List<Format> allNewFormats) {
         List<Format> formats = Arrays.stream(bookDto.getBookFormat()
                         .split(", "))
                 .map(Format::new)
                 .toList();
 
         List<Format> allFormats = new ArrayList<>();
-        List<Format> newFormats = new ArrayList<>();
 
         for (Format format : formats) {
-            Format existFormat = formatsInDb.stream()
-                    .filter(format1 -> format1.equals(format))
-                    .findFirst()
-                    .orElse(null);
+            Format existFormat = allFormatExists.get(format.getFormat());
             if (existFormat != null) {
                 allFormats.add(existFormat);
             } else {
                 allFormats.add(format);
-                newFormats.add(format);
+                allNewFormats.add(format);
+                allFormatExists.put(format.getFormat(), format);
             }
-        }
-
-        if (!newFormats.isEmpty()) {
-            formatsInDb.addAll(newFormats);
-            formatRepository.saveAll(newFormats);
         }
 
         return allFormats;

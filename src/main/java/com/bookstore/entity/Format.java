@@ -16,7 +16,8 @@ import java.util.Objects;
 @NoArgsConstructor
 public class Format {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "format_seq")
+    @SequenceGenerator(name = "format_seq", sequenceName = "format_seq", allocationSize = 100)
     private Long id;
 
     @Column(name = "format")

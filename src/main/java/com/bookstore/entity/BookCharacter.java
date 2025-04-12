@@ -12,7 +12,8 @@ import lombok.*;
 @Builder
 public class BookCharacter {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_character_seq")
+    @SequenceGenerator(name = "book_character_seq", sequenceName = "book_character_seq", allocationSize = 100)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

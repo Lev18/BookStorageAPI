@@ -9,35 +9,34 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Component
 @AllArgsConstructor
-@Transactional
 public class BookToGenreMapper {
-    private final GenreRepository genreRepository;
-    public List<Genre> findOrCreateGenre(BookCsvDto bookCsvDto, Set<Genre> genresInRepository) {
+    // it is service logic
+//    private final GenreRepository genreRepository;
+    public List<Genre> findOrCreateGenre(BookCsvDto bookCsvDto,
+                                         // rename
+                                         Map<String, Genre> genresExist,
+                                         List<Genre> allNewGenres) {
         List<Genre> genres = new ArrayList<>();
-        List<Genre> new_genres = new ArrayList<>();
-        for (String genre : bookCsvDto.getGenres()) {
-            Genre newgenre = new Genre(genre);
 
-            Genre existingGenre = genresInRepository.stream()
-                                                    .filter(genre1 -> genre1.getGenreTitle().equals(genre))
-                                                    .findFirst()
-                                                    .orElse(null);
+        for (String genre : bookCsvDto.getGenres()) {
+            String cleanGenre = genre.replaceAll("'","").trim();
+            Genre newgenre = new Genre(cleanGenre);
+
+            Genre existingGenre = genresExist.get(cleanGenre);
             if (existingGenre != null) {
                 genres.add(existingGenre);
             } else {
-                new_genres.add(newgenre);
+                allNewGenres.add(newgenre);
                 genres.add(newgenre);
+                genresExist.put(cleanGenre, newgenre);
             }
         }
 
-        if (!genres.isEmpty()) {
-            genreRepository.saveAll(new_genres);
-            genresInRepository.addAll(new_genres);
-        }
         return genres;
     }
 }

@@ -15,32 +15,27 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 public class BookToAuthorMapper {
     private final AuthorRepository authorRepository;
-    public List<Author> bookToAuthorMapper(BookCsvDto bookDto, Set<Author> authorsInRepository) {
+    public List<Author> bookToAuthorMapper(BookCsvDto bookDto,
+                                           Map<String, Author> authorsInRepository,
+                                           List<Author> newAuthors) {
         List<Author> authors = Arrays.stream(bookDto.getAuthor()
                         .split(", "))
                 .map(Author::new)
                 .toList();
 
         List<Author> allAuthors = new ArrayList<>();
-        List<Author> newAuthors = new ArrayList<>();
 
         for (Author author : authors) {
-            Author exisingAuthor = authorsInRepository.stream()
-                    .filter(author1 -> author1.equals(author))
-                    .findFirst()
-                    .orElse(null);
+            Author exisingAuthor = authorsInRepository.get(author.getAuthorName().trim().toLowerCase());
             if (exisingAuthor != null) {
                 allAuthors.add(exisingAuthor);
             } else {
                 allAuthors.add(author);
                 newAuthors.add(author);
+                authorsInRepository.put(author.getAuthorName().trim().toLowerCase(), author);
             }
         }
 
-        if (!newAuthors.isEmpty()) {
-            authorsInRepository.addAll(newAuthors);
-            authorRepository.saveAll(newAuthors);
-        }
         return allAuthors;
     }
 }

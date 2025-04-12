@@ -10,7 +10,8 @@ import lombok.Setter;
 @Getter
 public class BookGenre {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_genre_seq")
+    @SequenceGenerator(name = "book_genre_seq", sequenceName = "book_genre_seq", allocationSize = 100)
     private Long id;
  
     @ManyToOne(fetch = FetchType.LAZY)

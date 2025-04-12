@@ -10,14 +10,15 @@ import lombok.Setter;
 @Getter
 public class RatingByStars {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rating_seq")
+    @SequenceGenerator(name = "rating_seq", sequenceName = "rating_seq", allocationSize = 100)
     private Long id;
 
     @Column(name="grade")
     private  short grade;
 
-    @Column(name = "stars")
-    private String ratingStars;
+    @Column(name = "stars_rate")
+    private Integer ratingStars;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")

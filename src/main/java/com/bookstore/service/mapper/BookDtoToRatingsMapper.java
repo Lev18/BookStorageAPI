@@ -15,8 +15,8 @@ public class BookDtoToRatingsMapper {
         short gradesByFive = 5;
            for (String rate : bookCsvDto.getRatingsByStars()) {
                RatingByStars rating = new RatingByStars();
-               if (!rate.isEmpty() && !rate.isBlank()) {
-                   rating.setRatingStars(rate);
+               if (!rate.isBlank()) {
+                   rating.setRatingStars(Integer.parseInt(rate.replaceAll("'", "")));
                    rating.setBook(book);
                    rating.setGrade(gradesByFive--);
                    ratings.add(rating);
