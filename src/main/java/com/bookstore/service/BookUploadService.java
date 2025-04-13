@@ -44,6 +44,7 @@ public class BookUploadService {
     private final PublisherRepository publisherRepository;
     private final SettingRepository settingRepository;
     private final BookSettingRepository bookSettingRepository;
+    private final BookPublisherRepository bookPublisherRepository;
 
 
     @Transactional
@@ -54,6 +55,8 @@ public class BookUploadService {
         List<BookAuthor> allNewBookAuthor = new ArrayList<>();
         List<BookFormat> allNewBookFormat = new ArrayList<>();
         List<BookAward> allNewBookAward = new ArrayList<>();
+        List<BookPublisher> allNewBookPublishers = new ArrayList<>();
+
         List<Publisher> newPublishers = new ArrayList<>();
         List<BookCharacter> allNewBookCharacters = new ArrayList<>();
         List<Genre> allNewGenres = new ArrayList<>();
@@ -61,10 +64,12 @@ public class BookUploadService {
         List<Author> allNewAuthors = new ArrayList<>();
         List<Award> allNewAwards = new ArrayList<>();
         List<Setting> allNewSettings = new ArrayList<>();
-
+        List<Characters> allNewCharacters = new ArrayList<>();
         List<BookSetting> allNewBookSettings = new ArrayList<>();
 
         Set<RatingByStars> ratingByStars = new HashSet<>();
+        Set<String> uniqueIsbn = new HashSet<>(bookRepository.getAllISBNs());
+
 
         //TODO: create data structure similar to LRUCache to avoid from memory overflow
         // search inside that cache, if cache miss request db
@@ -75,6 +80,11 @@ public class BookUploadService {
             allExistingAuthors.put(a.getAuthorName().toLowerCase(), a);
         }
 
+        Map<String, Characters> allExistingCharacters = new HashMap<>();
+        for (Characters a : charactersRepository.findAll()) {
+            allExistingCharacters.put(a.getCharacterName().toLowerCase(), a);
+        }
+
         Map<String, Award> allExistingAwards = new HashMap<>();
         for (Award a : awardsRepository.findAll()) {
             allExistingAwards.put(a.getName().toLowerCase(), a);
@@ -82,21 +92,26 @@ public class BookUploadService {
 
         Map<String, Setting> allExistingSettings = new HashMap<>();
         for (Setting a : settingRepository.findAll()) {
-            allExistingSettings.put(a.getSetting(), a);
+            allExistingSettings.put(a.getSetting().toLowerCase(), a);
         }
 
         Map<String, Genre> allExistingGenres = new HashMap<>();
         for (Genre a : genreRepository.findAll()) {
-            allExistingGenres.put(a.getGenreTitle(), a);
+            allExistingGenres.put(a.getGenreTitle().toLowerCase(), a);
         }
 
         Map<String, Format> allFormatExists = new HashMap<>();
         for (Format a : formatRepository.findAll()) {
-            allFormatExists.put(a.getFormat(), a);
+            allFormatExists.put(a.getFormat().toLowerCase(), a);
         }
+
+        Map<String, Publisher> allPublisherExists = new HashMap<>();
+        for (Publisher a : publisherRepository.findAll()) {
+            allPublisherExists.put(a.getPublisherName().toLowerCase(), a);
+        }
+
+
         //renaming this variable name
-        Set<String> uniqueIsbn = new HashSet<>(bookRepository.getAllISBNs());
-        Set<Publisher> publishers = new HashSet<>(publisherRepository.findAll());
 
         for (BookCsvDto bookCsvDto : bookCsvDtos) {
             if (uniqueIsbn.contains(bookCsvDto.getIsbn())) {
@@ -105,9 +120,7 @@ public class BookUploadService {
             }
 
             Book book = bookDtoToBookDBMapper.bookDtoToBookMapper(bookCsvDto);
-            //TODO: many to many
-            book.setPublisher(bookDtoToPublisherMapper.bookToPublisherMapper(bookCsvDto,
-                    publishers, newPublishers));
+
             allBooks.add(book);
             ratingByStars.addAll(book.getStars());
             uniqueIsbn.add(bookCsvDto.getIsbn());
@@ -149,9 +162,9 @@ public class BookUploadService {
             }
 
             Map<String, Award> allAwards = bookDtoToAwardMapper
-                    .bookToAwardMapper(bookCsvDto,
-                            allExistingAwards,
-                            allNewAwards);
+                                .bookToAwardMapper(bookCsvDto,
+                                    allExistingAwards,
+                                    allNewAwards);
             for (Map.Entry<String, Award> entry : allAwards.entrySet()) {
                 BookAward bookAward = new BookAward();
                 bookAward.setAward(entry.getValue());
@@ -160,14 +173,16 @@ public class BookUploadService {
                 allNewBookAward.add(bookAward);
             }
 
-//            List<Characters> allNewCharacters = characterMapper
-//                    .mapBookDtoToCharacter(bookCsvDto, allCharactersInDb);
-//            for (Characters character : allNewCharacters) {
-//                BookCharacter bookCharacter = new BookCharacter();
-//                bookCharacter.setBook(book);
-//                bookCharacter.setCharacter(character);
-//                allNewBookCharacters.add(bookCharacter);
-//            }
+            List<Characters> allCharacters = characterMapper
+                        .mapBookDtoToCharacter(bookCsvDto,
+                                    allExistingCharacters,
+                                    allNewCharacters);
+            for (Characters character : allCharacters) {
+                BookCharacter bookCharacter = new BookCharacter();
+                bookCharacter.setBook(book);
+                bookCharacter.setCharacter(character);
+                allNewBookCharacters.add(bookCharacter);
+            }
 
             List<Setting> allSettings = bookDtoToSettingMapper
                             .mapBookDtoToSetting(bookCsvDto,
@@ -179,15 +194,28 @@ public class BookUploadService {
                 bookSetting.setSetting(setting);
                 allNewBookSettings.add(bookSetting);
             }
+
+            List<Publisher> allPublishers = bookDtoToPublisherMapper
+                                    .bookToPublisherMapper(bookCsvDto,
+                                                        allPublisherExists,
+                                                        newPublishers);
+            for (Publisher publisher : allPublishers) {
+                BookPublisher bookPublisher = new BookPublisher();
+                bookPublisher.setBook(book);
+                bookPublisher.setPublisher(publisher);
+                allNewBookPublishers.add(bookPublisher);
+            }
+
         }
 
-        publisherRepository.saveAll(newPublishers);
         bookRepository.saveAll(allBooks);
         genreRepository.saveAll(allNewGenres);
+        charactersRepository.saveAll(allNewCharacters);
         formatRepository.saveAll(allNewFormats);
         authorRepository.saveAll(allNewAuthors);
         awardsRepository.saveAll(allNewAwards);
         settingRepository.saveAll(allNewSettings);
+        publisherRepository.saveAll(newPublishers);
 
         bookGenreRepository.saveAll(new ArrayList<>(allBookGenres));
         bookAuthorRepository.saveAll(allNewBookAuthor);
@@ -195,6 +223,7 @@ public class BookUploadService {
         bookAwardRepository.saveAll(allNewBookAward);
         bookCharacterRepository.saveAll(allNewBookCharacters);
         bookSettingRepository.saveAll(allNewBookSettings);
+        bookPublisherRepository.saveAll(allNewBookPublishers);
 
         ratingByStarsRepository.saveAll(ratingByStars);
 

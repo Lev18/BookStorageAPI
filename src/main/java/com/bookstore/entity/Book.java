@@ -70,9 +70,8 @@ public class Book {
     @Column(name = "price")
     private String price;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "publisher_id")
-    private Publisher publisher;
+    @OneToMany(mappedBy = "book")
+    private List<BookPublisher> bookPublishers;
 
     @OneToMany(mappedBy = "book")
     private List<BookAward> awards;

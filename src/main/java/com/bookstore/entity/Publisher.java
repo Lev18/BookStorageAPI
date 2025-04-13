@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "publishers")
@@ -17,12 +18,26 @@ public class Publisher {
 
     @Column(name = "publisher_name")
     private String publisherName;
-    
+
     @OneToMany(mappedBy = "publisher")
-    List<Book> books;
+    List<BookPublisher> bookPublishers;
+
     private Publisher(){}
 
     public Publisher(String publisherName) {
         this.publisherName = publisherName;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || this.getClass() != obj.getClass()) return false;
+        Publisher genre = (Publisher) obj;
+        return Objects.equals(this.publisherName, ((Publisher) obj).publisherName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(publisherName);
     }
 }

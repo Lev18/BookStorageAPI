@@ -7,23 +7,29 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class BookToPublisherMapper {
     // TODO refactor Publisher table into many to many
-    @Transactional
-    public Publisher bookToPublisherMapper(BookCsvDto bookDto,
-                                           Set<Publisher> publishersInDb,
-                                           List<Publisher> newPublishers) {
-        Publisher newPublisher = publishersInDb.stream()
-                .filter(publisher -> publisher.getPublisherName().equals(bookDto.getPublisher()))
-                .findFirst()
-                .orElseGet(() ->{
-                    Publisher publisher = new Publisher(bookDto.getPublisher());
-                    return publisher;
-        });
-        publishersInDb.add(newPublisher);
-        newPublishers.add(newPublisher);
-        return  newPublisher;
+    public List<Publisher> bookToPublisherMapper(BookCsvDto bookDto,
+                                           Map<String, Publisher> allPublishersExist,
+                                           List<Publisher> allNewPublishers) {
+        List<Publisher> publishers = Arrays.stream(bookDto.getPublisher().split("/"))
+                                           .map(Publisher::new)
+                                           .toList();
+        List<Publisher> allPublishers = new ArrayList<>();
+
+        for (Publisher publisher : publishers) {
+            Publisher existPublisher = allPublishersExist.get(publisher.getPublisherName().toLowerCase());
+            if (existPublisher != null) {
+                allPublishers.add(existPublisher);
+            } else {
+                allPublishers.add(publisher);
+                allNewPublishers.add(publisher);
+                allPublishersExist.put(publisher.getPublisherName(), publisher);
+            }
+        }
+        return  allPublishers;
     }
 }

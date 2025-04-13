@@ -24,13 +24,13 @@ public class BookDtoToFormatMapper {
         List<Format> allFormats = new ArrayList<>();
 
         for (Format format : formats) {
-            Format existFormat = allFormatExists.get(format.getFormat());
+            Format existFormat = allFormatExists.get(format.getFormat().toLowerCase());
             if (existFormat != null) {
                 allFormats.add(existFormat);
             } else {
                 allFormats.add(format);
                 allNewFormats.add(format);
-                allFormatExists.put(format.getFormat(), format);
+                allFormatExists.put(format.getFormat().toLowerCase(), format);
             }
         }
 

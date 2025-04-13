@@ -27,13 +27,13 @@ public class BookToGenreMapper {
             String cleanGenre = genre.replaceAll("'","").trim();
             Genre newgenre = new Genre(cleanGenre);
 
-            Genre existingGenre = genresExist.get(cleanGenre);
+            Genre existingGenre = genresExist.get(cleanGenre.toLowerCase());
             if (existingGenre != null) {
                 genres.add(existingGenre);
             } else {
                 allNewGenres.add(newgenre);
                 genres.add(newgenre);
-                genresExist.put(cleanGenre, newgenre);
+                genresExist.put(cleanGenre.toLowerCase(), newgenre);
             }
         }
 

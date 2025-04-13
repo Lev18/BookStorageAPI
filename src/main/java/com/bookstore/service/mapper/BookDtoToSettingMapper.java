@@ -22,7 +22,7 @@ public class BookDtoToSettingMapper {
         List<Setting> allSettings = new ArrayList<>();
         for (String s : bookDto.getSetting()) {
             if (!s.isBlank()) {
-                String cleanSetting = s.replaceAll("'", "").trim();
+                String cleanSetting = s.replaceAll("'", "").trim().toLowerCase();
                 Setting setting = allSettingExists.get(cleanSetting);
                 if (setting == null) {
                     setting = new Setting(cleanSetting);

@@ -26,12 +26,15 @@ public class BookDtoToCharacterMapper {
         for (String s : bookDto.getCharacters()) {
             if (!s.isBlank()) {
                 String cleanCharacter = s.replaceAll("'", "").trim();
-                String uniqueCharacter = cleanCharacter + "|" + bookDto.getTitle();
-                Characters character = charactersMap.get(uniqueCharacter);
+                String uniqueCharacter = !bookDto.getSeries().isBlank() ?
+                        cleanCharacter + "|" + bookDto.getSeries().split("#")[0].trim():
+                        cleanCharacter + "|" +bookDto.getTitle().trim();
+
+                Characters character = charactersMap.get(uniqueCharacter.toLowerCase());
                 if (character == null) {
                     character = new Characters(cleanCharacter);
                     newCharacters.add(character);
-                    charactersMap.put(uniqueCharacter, character);
+                    charactersMap.put(uniqueCharacter.toLowerCase(), character);
                 }
                 allCharacters.add(character);
             }
