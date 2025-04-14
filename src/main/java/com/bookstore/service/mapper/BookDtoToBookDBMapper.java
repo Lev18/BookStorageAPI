@@ -17,7 +17,6 @@ public class BookDtoToBookDBMapper {
             Book book = new Book();
             book.setBookId(bookDto.getBookId());
             book.setTitle(bookDto.getTitle());
-            book.setSeries(bookDto.getSeries());
             book.setRating(bookDto.getRating());
             book.setDescription(bookDto.getDescription());
             book.setLanguage(Language.fromLanguageName(bookDto.getLanguage()));

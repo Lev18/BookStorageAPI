@@ -40,9 +40,8 @@ Table book {
   bbeVotes  integer
   price double
   author_id integer [not null]
-  format_id integer [not null]
+  series_id integer
   publsher_id integer [not null]
-
 }
 
 Table author {
@@ -70,6 +69,7 @@ Table book_format {
 Table characters{
   id integer [primary key]
   charName varchar
+  series_id integer
 }
 
 
@@ -79,10 +79,29 @@ Table book_character {
   character_id integer [not null]
 }
 
+
+Table series {
+  id integer [primary key]
+  ser_name varchar
+}
+
+Table series_character {
+  id integer [primary key]
+  series_id integer [not null]
+  character_id integer [not null]
+}
+
 Table publisher {
   id integer [primary key]
   publisher_name varchar
 }
+
+Table book_publisher {
+  id integer [primary key]
+  book_id integer [not null]
+  publisher_id integer [not null]
+}
+
 
 Table awards {
   id integer [primary key]
@@ -150,14 +169,13 @@ Ref: genre.id < book_genre.genre_id
 Ref: book.id < book_setting.book_id
 Ref: setting.id < book_setting.setting_id
 
+Ref:book.id < book_publisher.book_id
+Ref: publisher.id < book_publisher.publisher_id
 
-Ref: publisher.id < book.publsher_id
-
-// Ref user_posts: posts.user_id > users.id // many-to-one
-
-
-
-// Ref: users.id < follows.followed_user_id
+Ref: series.id < book.series_id
+Ref: series.id < series_character.series_id
+Ref: characters.id < series_character.character_id
+//Ref: "series"."id" < "series"."ser_name"
 
 
 numRating move to + // make it dynamic don't keep in db

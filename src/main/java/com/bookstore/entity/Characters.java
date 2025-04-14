@@ -23,6 +23,9 @@ public class Characters {
     @OneToMany(mappedBy = "character")
     private List<BookCharacter> bookCharacters;
 
+    @OneToMany(mappedBy = "character")
+    private List<SeriesCharacter> seriesCharacters;
+
     public Characters() {
     }
 

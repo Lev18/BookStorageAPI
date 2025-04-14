@@ -24,9 +24,6 @@ public class Book {
     @Column(name = "book_title", nullable = false)
     private String title;
 
-    @Column(name = "book_series")
-    private String series;
-
     @Column(name = "rating")
     private String rating;
 
@@ -96,6 +93,10 @@ public class Book {
 
     @OneToMany(mappedBy = "book")
     private List<BookSetting> bookSettings;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "series_id")
+    private Series series;
 
     public void setNumRatingByStars(List<RatingByStars> ratingByStars) {
       this.numRatings = ratingByStars.stream()

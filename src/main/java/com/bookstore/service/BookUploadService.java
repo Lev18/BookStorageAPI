@@ -15,12 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
-// handle preloading of the same elements of
 @Component("appServiceImpl")
 @AllArgsConstructor
 public class BookUploadService {
     private final CsvReaderService csvReaderService;
     private final BookDtoToBookDBMapper bookDtoToBookDBMapper;
+    // TODO: collect into BookMapperService class
     private final BookToGenreMapper bookToGenreMapper;
     private final BookToAuthorMapper bookToAuthorMapper;
     private final BookDtoToFormatMapper bookDtoToFormatMapper;
@@ -28,6 +28,8 @@ public class BookUploadService {
     private final BookToPublisherMapper bookDtoToPublisherMapper;
     private final BookDtoToCharacterMapper characterMapper;
     private final BookDtoToSettingMapper bookDtoToSettingMapper;
+    private final BookDtoToSeriesMapper bookDtoToSeriesMapper;
+
 
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
@@ -39,12 +41,15 @@ public class BookUploadService {
     private final GenreRepository genreRepository;
     private final FormatRepository formatRepository;
     private final RatingByStarsRepository ratingByStarsRepository;
+    private final SeriesRepository seriesRepository;
+
     private final BookFormatRepository bookFormatRepository;
     private final CharactersRepository charactersRepository;
     private final PublisherRepository publisherRepository;
     private final SettingRepository settingRepository;
     private final BookSettingRepository bookSettingRepository;
     private final BookPublisherRepository bookPublisherRepository;
+    private final SeriesCharacterRepository seriesCharacterRepository;
 
 
     @Transactional
@@ -56,6 +61,8 @@ public class BookUploadService {
         List<BookFormat> allNewBookFormat = new ArrayList<>();
         List<BookAward> allNewBookAward = new ArrayList<>();
         List<BookPublisher> allNewBookPublishers = new ArrayList<>();
+        List<SeriesCharacter> allNewSeriesCharacter = new ArrayList<>();
+        List<BookSetting> allNewBookSettings = new ArrayList<>();
 
         List<Publisher> newPublishers = new ArrayList<>();
         List<BookCharacter> allNewBookCharacters = new ArrayList<>();
@@ -65,7 +72,7 @@ public class BookUploadService {
         List<Award> allNewAwards = new ArrayList<>();
         List<Setting> allNewSettings = new ArrayList<>();
         List<Characters> allNewCharacters = new ArrayList<>();
-        List<BookSetting> allNewBookSettings = new ArrayList<>();
+        List<Series> allNewSeries = new ArrayList<>();
 
         Set<RatingByStars> ratingByStars = new HashSet<>();
         Set<String> uniqueIsbn = new HashSet<>(bookRepository.getAllISBNs());
@@ -74,6 +81,7 @@ public class BookUploadService {
         //TODO: create data structure similar to LRUCache to avoid from memory overflow
         // search inside that cache, if cache miss request db
         // this is temporary solution it also can cause memory overflow
+
 
         Map<String, Author> allExistingAuthors = new HashMap<>();
         for (Author a : authorRepository.findAll()) {
@@ -110,6 +118,10 @@ public class BookUploadService {
             allPublisherExists.put(a.getPublisherName().toLowerCase(), a);
         }
 
+        Map<String, Series> allSeriesExists = new HashMap<>();
+        for (Series a : seriesRepository.findAll()) {
+            allSeriesExists.put(a.getSeries().toLowerCase(), a);
+        }
 
         //renaming this variable name
 
@@ -119,14 +131,30 @@ public class BookUploadService {
                 continue;
             }
 
+
+
             Book book = bookDtoToBookDBMapper.bookDtoToBookMapper(bookCsvDto);
+            Series newSeries = bookDtoToSeriesMapper
+                                        .mapBookToSeries(bookCsvDto,
+                                                allSeriesExists,
+                                                allNewSeries);
+            //TODO: separate mapper logic from save
+            // example
+//            bookMapperService.mapBookToAuthor(bookCsvDto,
+//                    allExistingAuthors,
+//                    allNewAuthors,
+//                    allNewBookAuthor);
+//
+            if (newSeries != null) {
+                book.setSeries(newSeries);
+            }
 
             allBooks.add(book);
+
             ratingByStars.addAll(book.getStars());
             uniqueIsbn.add(bookCsvDto.getIsbn());
 
-            //TODO:refactor to separate function also inside mapper remove to other service
-            //
+
             List<Author> allAuthors = bookToAuthorMapper
                     .bookToAuthorMapper(bookCsvDto,
                             allExistingAuthors,
@@ -182,6 +210,13 @@ public class BookUploadService {
                 bookCharacter.setBook(book);
                 bookCharacter.setCharacter(character);
                 allNewBookCharacters.add(bookCharacter);
+
+                if (newSeries != null) {
+                    SeriesCharacter seriesCharacter = new SeriesCharacter();
+                    seriesCharacter.setSeries(newSeries);
+                    seriesCharacter.setCharacter(character);
+                    allNewSeriesCharacter.add(seriesCharacter);
+                }
             }
 
             List<Setting> allSettings = bookDtoToSettingMapper
@@ -205,9 +240,9 @@ public class BookUploadService {
                 bookPublisher.setPublisher(publisher);
                 allNewBookPublishers.add(bookPublisher);
             }
-
         }
 
+        seriesRepository.saveAll(allNewSeries);
         bookRepository.saveAll(allBooks);
         genreRepository.saveAll(allNewGenres);
         charactersRepository.saveAll(allNewCharacters);
@@ -224,12 +259,14 @@ public class BookUploadService {
         bookCharacterRepository.saveAll(allNewBookCharacters);
         bookSettingRepository.saveAll(allNewBookSettings);
         bookPublisherRepository.saveAll(allNewBookPublishers);
+        seriesCharacterRepository.saveAll(allNewSeriesCharacter);
 
         ratingByStarsRepository.saveAll(ratingByStars);
 
 
         return allBooks.size();
     }
+
     // ResponseEntity<?> move to controller
     public ResponseEntity<?> uploadAndSaveFile(MultipartFile file) throws UnableParseFile {
         List<BookCsvDto> csvDTos = csvReaderService.uploadBooks(file);
