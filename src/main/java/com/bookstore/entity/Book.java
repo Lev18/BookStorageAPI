@@ -5,7 +5,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "books")
@@ -70,14 +73,14 @@ public class Book {
     @OneToMany(mappedBy = "book")
     private List<BookPublisher> bookPublishers;
 
-    @OneToMany(mappedBy = "book")
-    private List<BookAward> awards;
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
+    private Set<BookAward> awards;
 
     @OneToMany(mappedBy = "book")
     private List<BookCharacter> characters;
 
     @OneToMany(mappedBy = "book")
-    private List<BookGenre> genres;
+    private Set<BookGenre> genres;
 
     @OneToMany(mappedBy = "book")
     private List<BookSetting> settings;

@@ -2,7 +2,7 @@ package com.bookstore.service;
 
 import com.bookstore.entity.*;
 import com.bookstore.repository.*;
-import com.bookstore.service.dto.BookCsvDto;
+import com.bookstore.service.csvDto.BookCsvDto;
 import com.bookstore.service.exception.UnableParseFile;
 import com.bookstore.service.fileReader.CsvReaderService;
 import com.bookstore.service.mapper.*;
@@ -127,7 +127,6 @@ public class BookUploadService {
 
         for (BookCsvDto bookCsvDto : bookCsvDtos) {
             if (uniqueIsbn.contains(bookCsvDto.getIsbn())) {
-                // System.out.println("[INFO:] " + "\"\u001B[4m" + bookCsvDto.getTitle() + "\u001B[0m\" already exist or incorrect isbn series");
                 continue;
             }
 
@@ -161,8 +160,8 @@ public class BookUploadService {
                             allNewAuthors);
             for (Author author : allAuthors) {
                 BookAuthor bookAuthor = new BookAuthor();
-                bookAuthor.setBook(book);
                 bookAuthor.setAuthor(author);
+                bookAuthor.setBook(book);
                 allNewBookAuthor.add(bookAuthor);
             }
 
@@ -247,12 +246,12 @@ public class BookUploadService {
         genreRepository.saveAll(allNewGenres);
         charactersRepository.saveAll(allNewCharacters);
         formatRepository.saveAll(allNewFormats);
-        authorRepository.saveAll(allNewAuthors);
         awardsRepository.saveAll(allNewAwards);
+        authorRepository.saveAll(allNewAuthors);
         settingRepository.saveAll(allNewSettings);
         publisherRepository.saveAll(newPublishers);
 
-        bookGenreRepository.saveAll(new ArrayList<>(allBookGenres));
+        bookGenreRepository.saveAll(allBookGenres);
         bookAuthorRepository.saveAll(allNewBookAuthor);
         bookFormatRepository.saveAll(allNewBookFormat);
         bookAwardRepository.saveAll(allNewBookAward);
@@ -268,11 +267,9 @@ public class BookUploadService {
     }
 
     // ResponseEntity<?> move to controller
-    public ResponseEntity<?> uploadAndSaveFile(MultipartFile file) throws UnableParseFile {
+    public int uploadAndSaveFile(MultipartFile file) throws UnableParseFile {
         List<BookCsvDto> csvDTos = csvReaderService.uploadBooks(file);
-        if (csvDTos.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("File already parsed NO new book\n");
-        }
-        return ResponseEntity.ok(saveBook(csvDTos) + " new  books were saved\n");
+
+        return saveBook(csvDTos);
     }
 }

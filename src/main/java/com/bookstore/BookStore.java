@@ -19,9 +19,9 @@ public class BookStore {
 	@Bean
 	public Executor taskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(10);
-		executor.setMaxPoolSize(20);
-		executor.setQueueCapacity(1000);
+		executor.setCorePoolSize(20);
+		executor.setMaxPoolSize(50);
+		executor.setQueueCapacity(50000);
 		executor.setThreadNamePrefix("ImageDownloader-");
 		executor.initialize();
 

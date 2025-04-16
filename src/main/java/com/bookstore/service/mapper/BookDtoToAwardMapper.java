@@ -1,8 +1,7 @@
 package com.bookstore.service.mapper;
 
 import com.bookstore.entity.Award;
-import com.bookstore.repository.AwardsRepository;
-import com.bookstore.service.dto.BookCsvDto;
+import com.bookstore.service.csvDto.BookCsvDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

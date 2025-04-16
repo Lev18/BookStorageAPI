@@ -1,17 +1,13 @@
 package com.bookstore.service.mapper;
 
-import com.bookstore.entity.Book;
-import com.bookstore.entity.BookCharacter;
 import com.bookstore.entity.Characters;
 import com.bookstore.repository.CharactersRepository;
-import com.bookstore.service.dto.BookCsvDto;
+import com.bookstore.service.csvDto.BookCsvDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor

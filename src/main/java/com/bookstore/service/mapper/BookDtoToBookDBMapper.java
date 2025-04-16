@@ -1,7 +1,7 @@
 package com.bookstore.service.mapper;
 
 import com.bookstore.entity.Book;
-import com.bookstore.service.dto.BookCsvDto;
+import com.bookstore.service.csvDto.BookCsvDto;
 import com.bookstore.service.enums.Language;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
