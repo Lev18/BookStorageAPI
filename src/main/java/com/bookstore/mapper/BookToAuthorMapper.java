@@ -1,4 +1,4 @@
-package com.bookstore.service.mapper;
+package com.bookstore.mapper;
 
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
@@ -13,7 +13,7 @@ import java.util.*;
 public class BookToAuthorMapper {
     private final AuthorRepository authorRepository;
     public List<Author> bookToAuthorMapper(BookCsvDto bookDto,
-                                           Map<String, Author> authorsInRepository,
+                                           Map<String, Author> authorsExists,
                                            List<Author> newAuthors) {
         List<Author> authors = Arrays.stream(bookDto.getAuthor()
                         .split(", "))
@@ -23,13 +23,15 @@ public class BookToAuthorMapper {
         List<Author> allAuthors = new ArrayList<>();
 
         for (Author author : authors) {
-            Author exisingAuthor = authorsInRepository.get(author.getAuthorName().trim().toLowerCase());
+            Author exisingAuthor = authorsExists.get(author.getAuthorName().trim().toLowerCase());
             if (exisingAuthor != null) {
                 allAuthors.add(exisingAuthor);
             } else {
                 allAuthors.add(author);
-                newAuthors.add(author);
-                authorsInRepository.put(author.getAuthorName().trim().toLowerCase(), author);
+                synchronized (author) {
+                    newAuthors.add(author);
+                    authorsExists.put(author.getAuthorName().trim().toLowerCase(), author);
+                }
             }
         }
 

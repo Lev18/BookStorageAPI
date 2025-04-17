@@ -1,4 +1,4 @@
-package com.bookstore.service.mapper;
+package com.bookstore.mapper;
 
 import com.bookstore.entity.Setting;
 import com.bookstore.repository.SettingRepository;
@@ -24,8 +24,10 @@ public class BookDtoToSettingMapper {
                 Setting setting = allSettingExists.get(cleanSetting);
                 if (setting == null) {
                     setting = new Setting(cleanSetting);
-                    newSettings.add(setting);
-                    allSettingExists.put(cleanSetting, setting);
+                    synchronized (setting) {
+                        newSettings.add(setting);
+                        allSettingExists.put(cleanSetting, setting);
+                    }
                 }
                 allSettings.add(setting);
             }

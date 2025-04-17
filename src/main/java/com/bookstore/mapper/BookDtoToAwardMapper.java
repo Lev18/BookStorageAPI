@@ -1,4 +1,4 @@
-package com.bookstore.service.mapper;
+package com.bookstore.mapper;
 
 import com.bookstore.entity.Award;
 import com.bookstore.dto.csvDto.BookCsvDto;
@@ -18,7 +18,11 @@ public class BookDtoToAwardMapper {
 
         Map<String, Award> allAwards = new HashMap<>();
         for (String original : bookCsvDto.getAwards()) {
-            String normalized = original.split(" for ")[0].split("\\(")[0].trim().toLowerCase();
+            String normalized = original.split(" for ")[0]
+                    .split("\\(")[0]
+                    .trim().toLowerCase()
+                    .replaceAll("'", "");
+
             if (!normalized.isEmpty() && !Character.isLetterOrDigit(normalized.charAt(0))) {
                 normalized = normalized.substring(1).trim();
             }
@@ -27,12 +31,13 @@ public class BookDtoToAwardMapper {
             Award newAward = awardExist.get(normalized);
             if (newAward == null) {
                 newAward = new Award(normalized);
-                newAwards.add(newAward);
-                awardExist.put(normalized, newAward);
+                synchronized (newAward) {
+                    newAwards.add(newAward);
+                    awardExist.put(normalized, newAward);
+                }
             }
-            allAwards.put(original, newAward);
+            allAwards.put(original.trim().replaceAll("'", ""), newAward);
         }
-
         return allAwards;
     }
 }

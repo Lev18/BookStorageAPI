@@ -1,11 +1,11 @@
 package com.bookstore.service;
 
-import com.bookstore.entity.Book;
-import com.bookstore.entity.BookAuthor;
-import com.bookstore.entity.BookAward;
-import com.bookstore.entity.Genre;
+import com.bookstore.dto.requestDto.AwardDto;
+import com.bookstore.entity.*;
 import com.bookstore.enums.Language;
 import com.bookstore.exception.ImageNotFound;
+import com.bookstore.repository.AwardsRepository;
+import com.bookstore.repository.BookAwardRepository;
 import com.bookstore.repository.BookRepository;
 import com.bookstore.dto.responceDto.BookInfoDTO;
 import com.bookstore.dto.responceDto.GenreInfoDTO;
@@ -34,6 +34,8 @@ public class BookService {
     private final GenreRepository genreRepository;
     private final ImageLoaderService imageLoader;
     private final EntityManager entityManager;
+    private final AwardsRepository awardsRepository;
+    private final BookAwardRepository bookAwardRepository;
     public Book updateBookRating(String bookIsbn, String newRate) {
         Book book = bookRepository.findBookByIsbn(bookIsbn);
         if (book != null) {
@@ -80,18 +82,16 @@ public class BookService {
     public List<GenreInfoDTO> getAllBooksByGenre(String genre) {
         TypedQuery<GenreInfoDTO> query
                = entityManager.createQuery(
-          "select new BookGenreInfoDTO(b.title, g.genreTitle, b.isbn) " +
+          "select new GenreInfoDTO(b.title, g.genreTitle, b.isbn) " +
                   "from Book b " +
                   "join BookGenre bg on b.id = bg.book.id " +
                   "join Genre g on g.id = bg.genre.id " +
                   "where genreTitle = :genreTitle " +
-                  "order by bg.id " +
-                  "limit :showLimit" ,
+                  "order by bg.id ",
                 GenreInfoDTO.class
         );
         query.setParameter("genreTitle", genre);
-        query.setParameter("showLimit", 100);
-
+        query.setMaxResults(100);
 
         return query.getResultList();
     }
@@ -156,6 +156,25 @@ public class BookService {
         genreRepository.deleteBookGenresByGenreId(genre.getId());
         genreRepository.delete(genre);
         return genre;
+    }
+
+    public String addNewAward(String bookIsbn, AwardDto newAward) {
+        Book book = bookRepository.findBookByIsbn(bookIsbn);
+        if (book != null) {
+            Award award = awardsRepository.findByName(newAward.getAward());
+            if (award == null) {
+                award = new Award(newAward.getAward());
+                awardsRepository.save(award);
+            }
+            bookRepository.save(book);
+            BookAward bookAward = new BookAward();
+            bookAward.setAward(award);
+            bookAward.setBook(book);
+            bookAward.setBookAward(newAward.getAward() + '(' + newAward.getAwardYear() + ')');
+            bookAwardRepository.save(bookAward);
+            return book.getTitle();
+        }
+        return null;
     }
 }
 

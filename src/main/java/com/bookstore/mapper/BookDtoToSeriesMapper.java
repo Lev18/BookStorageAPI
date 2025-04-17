@@ -1,4 +1,4 @@
-package com.bookstore.service.mapper;
+package com.bookstore.mapper;
 
 import com.bookstore.entity.Series;
 import com.bookstore.dto.csvDto.BookCsvDto;
@@ -22,8 +22,9 @@ public class BookDtoToSeriesMapper {
         }
         String cleanTitle = bookCsvDto.getTitle().toLowerCase().trim();
         Series newSeries = allSeriesExist.computeIfAbsent(cleanTitle, Series::new);
-
-        allNewSeries.add(newSeries);
+        synchronized (newSeries) {
+            allNewSeries.add(newSeries);
+        }
         return newSeries;
     }
 }

@@ -1,4 +1,4 @@
-package com.bookstore.service.mapper;
+package com.bookstore.mapper;
 
 import com.bookstore.entity.Publisher;
 import com.bookstore.dto.csvDto.BookCsvDto;

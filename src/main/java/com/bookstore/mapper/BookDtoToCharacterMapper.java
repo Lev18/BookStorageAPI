@@ -1,4 +1,4 @@
-package com.bookstore.service.mapper;
+package com.bookstore.mapper;
 
 import com.bookstore.entity.Characters;
 import com.bookstore.repository.CharactersRepository;
@@ -26,8 +26,10 @@ public class BookDtoToCharacterMapper {
                 Characters character = charactersMap.get(cleanCharacter);
                 if (character == null) {
                     character = new Characters(cleanCharacter);
-                    newCharacters.add(character);
-                    charactersMap.put(cleanCharacter, character);
+                    synchronized (character) {
+                        newCharacters.add(character);
+                        charactersMap.put(cleanCharacter, character);
+                    }
                 }
                 allCharacters.add(character);
             }

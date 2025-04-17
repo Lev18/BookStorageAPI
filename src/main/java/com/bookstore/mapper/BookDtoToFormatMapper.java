@@ -1,4 +1,4 @@
-package com.bookstore.service.mapper;
+package com.bookstore.mapper;
 
 import com.bookstore.entity.Format;
 import com.bookstore.dto.csvDto.BookCsvDto;
@@ -28,8 +28,10 @@ public class BookDtoToFormatMapper {
                 allFormats.add(existFormat);
             } else {
                 allFormats.add(format);
-                allNewFormats.add(format);
-                allFormatExists.put(format.getFormat().toLowerCase(), format);
+                synchronized (format) {
+                    allNewFormats.add(format);
+                    allFormatExists.put(format.getFormat().toLowerCase(), format);
+                }
             }
         }
 

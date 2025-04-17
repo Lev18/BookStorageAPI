@@ -1,4 +1,4 @@
-package com.bookstore.service.mapper;
+package com.bookstore.mapper;
 
 import com.bookstore.entity.Genre;
 import com.bookstore.dto.csvDto.BookCsvDto;
@@ -23,16 +23,15 @@ public class BookToGenreMapper {
         for (String genre : bookCsvDto.getGenres()) {
             String cleanGenre = genre.replaceAll("'","").trim().toLowerCase();
 
-            Genre newGenre = new Genre(cleanGenre);
-            Genre existingGenre = genresExist.get(cleanGenre);
 
-            if (existingGenre != null) {
-                genres.add(existingGenre);
-            } else {
-                allNewGenres.add(newGenre);
-                genres.add(newGenre);
-                genresExist.put(cleanGenre, newGenre);
-            }
+            Genre existingGenre = genresExist.computeIfAbsent(cleanGenre, key-> {
+               Genre newGenre = new Genre(cleanGenre);
+               synchronized (newGenre) {
+                   allNewGenres.add(newGenre);
+               }
+               return newGenre;
+            });
+            genres.add(existingGenre);
         }
 
         return genres;
