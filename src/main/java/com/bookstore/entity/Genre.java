@@ -18,7 +18,7 @@ public class Genre {
     @SequenceGenerator(name = "genre_seq", sequenceName = "genre_seq", allocationSize = 100)
     private Long id;
 
-    @Column(name = "genres", nullable = false)
+    @Column(name = "genres", nullable = false, unique = true)
     private String genreTitle;
     
     @OneToMany(mappedBy="genre")

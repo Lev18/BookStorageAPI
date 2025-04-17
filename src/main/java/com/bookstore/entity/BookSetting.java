@@ -10,11 +10,15 @@ import lombok.Setter;
 @Setter
 public class BookSetting {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_setting_seq")
-    @SequenceGenerator(name = "book_setting_seq", sequenceName = "book_setting_seq", allocationSize = 100)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "book_setting_seq")
+    @SequenceGenerator(name = "book_setting_seq",
+            sequenceName = "book_setting_seq",
+            allocationSize = 100)
     private Long id;
  
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,
+            cascade = CascadeType.REMOVE)
     @JoinColumn(name = "book_id")
     private Book book;
 

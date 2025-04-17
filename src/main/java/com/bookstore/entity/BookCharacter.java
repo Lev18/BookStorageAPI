@@ -20,7 +20,8 @@ public class BookCharacter {
     @JoinColumn(name = "book_id")
     private Book book;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,
+            cascade = CascadeType.REMOVE)
     @JoinColumn(name = "character_id")
     private Characters character;
 }

@@ -1,4 +1,4 @@
-package com.bookstore.service.enums;
+package com.bookstore.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -93,5 +93,10 @@ public enum Language {
                 .filter(lang ->lang.displayName.equalsIgnoreCase(input))
                 .findFirst()
                 .orElse(Language.UNKNOWN);
+    }
+
+    @Override
+    public String toString() {
+        return displayName;
     }
 }

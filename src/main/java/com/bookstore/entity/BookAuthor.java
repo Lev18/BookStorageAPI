@@ -16,7 +16,8 @@ public class BookAuthor {
     @SequenceGenerator(name = "book_author_seq", sequenceName = "book_author_seq", allocationSize = 100)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,
+            cascade = CascadeType.REMOVE)
     @JoinColumn(name = "book_id")
     Book book;
 

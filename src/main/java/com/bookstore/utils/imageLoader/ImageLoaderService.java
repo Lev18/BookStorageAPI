@@ -1,5 +1,7 @@
 package com.bookstore.utils.imageLoader;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -7,17 +9,17 @@ import javax.imageio.ImageIO;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.*;
 import java.net.URL;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 
 @Service
+@RequiredArgsConstructor
 public class ImageLoaderService {
- //    @Async
-    // download and resize
+
+    private final ImageResizeService imageResizeService;
+
+    @Async
     public void downloadImage(String url) {
         if (!url.isBlank() && !url.equals("\"\"")) {
             try (InputStream in = new URL(url)
@@ -37,7 +39,7 @@ public class ImageLoaderService {
                 System.out.println("Current dir:" +originalFile.getParentFile());
 
                 // save resized image
-                saveResizedImg(url, imageBytes);
+                imageResizeService.saveResizedImg(url, imageBytes);
 
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -45,31 +47,7 @@ public class ImageLoaderService {
         }
     }
 
-    @Async
-    public void saveResizedImg(String url,
-                               byte[] imageBytes) throws IOException {
-        File resizedFile = getFile(url, "resized");
-        BufferedImage original = ImageIO.read(new ByteArrayInputStream(imageBytes));
-        BufferedImage resizedImp = resizeImg(original,
-                                            original.getWidth() / 4,
-                                            original.getHeight() / 4);
-        if (!ImageIO.write(resizedImp, "jpg", resizedFile)) {
-            System.out.println("Filed to save resized image");
-        }
-    }
-
-    public BufferedImage resizeImg(BufferedImage originalImage,
-                                   int targetWidth,
-                                   int targetHeight) {
-        Image resultImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_DEFAULT);
-        BufferedImage outputImg = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = outputImg.createGraphics();
-        g2d.drawImage(resultImage, 0,0, null);
-        g2d.dispose();
-        return outputImg;
-
-    }
-    private File getFile(String url, String directory) {
+    public File getFile(String url, String directory) {
         String[] urlParts = url.split("/");
         FileSystemView view = FileSystemView.getFileSystemView();
         String ImageFilePath = view.getHomeDirectory().getPath() + "/Workspace/ImagesBook/" + directory;

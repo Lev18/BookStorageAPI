@@ -2,7 +2,7 @@ package com.bookstore.service.mapper;
 
 import com.bookstore.entity.Characters;
 import com.bookstore.repository.CharactersRepository;
-import com.bookstore.service.csvDto.BookCsvDto;
+import com.bookstore.dto.csvDto.BookCsvDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

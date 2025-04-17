@@ -1,8 +1,8 @@
 package com.bookstore.service.fileReader;
 
 import com.bookstore.repository.FileRepository;
-import com.bookstore.service.csvDto.BookCsvDto;
-import com.bookstore.service.exception.NoSuchFile;
+import com.bookstore.dto.csvDto.BookCsvDto;
+import com.bookstore.exception.NoSuchFile;
 import com.bookstore.utils.HashUtils;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;

@@ -1,4 +1,4 @@
-package com.bookstore.service.exception;
+package com.bookstore.exception;
 
 public class NoSuchFile extends RuntimeException {
     public NoSuchFile(String message) {

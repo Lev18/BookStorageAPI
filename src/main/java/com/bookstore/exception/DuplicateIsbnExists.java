@@ -1,4 +1,4 @@
-package com.bookstore.service.exception;
+package com.bookstore.exception;
 
 import org.springframework.stereotype.Component;
 

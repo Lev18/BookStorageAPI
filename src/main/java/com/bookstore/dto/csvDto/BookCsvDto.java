@@ -1,4 +1,4 @@
-package com.bookstore.service.csvDto;
+package com.bookstore.dto.csvDto;
 
 
 import com.bookstore.utils.StringToListConverter;

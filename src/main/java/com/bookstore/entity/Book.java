@@ -1,12 +1,10 @@
 package com.bookstore.entity;
 
-import com.bookstore.service.enums.Language;
+import com.bookstore.enums.Language;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -76,26 +74,28 @@ public class Book {
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
     private Set<BookAward> awards;
 
-    @OneToMany(mappedBy = "book")
-    private List<BookCharacter> characters;
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
+    private Set<BookCharacter> characters;
 
     @OneToMany(mappedBy = "book")
     private Set<BookGenre> genres;
 
-    @OneToMany(mappedBy = "book")
+    @OneToMany(mappedBy = "book",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true)
     private List<BookSetting> settings;
 
     @OneToMany(mappedBy = "ratingStars")
     private List<RatingByStars> stars;
 
     @OneToMany(mappedBy = "book")
-    private List<BookAuthor> author;
+    private Set<BookAuthor> author;
 
     @OneToMany(mappedBy = "book")
     private List<BookFormat> formats;
 
-    @OneToMany(mappedBy = "book")
-    private List<BookSetting> bookSettings;
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
+    private Set<BookSetting> bookSettings;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "series_id")

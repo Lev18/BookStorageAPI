@@ -2,7 +2,7 @@ package com.bookstore.service.mapper;
 
 import com.bookstore.entity.Book;
 import com.bookstore.entity.RatingByStars;
-import com.bookstore.service.csvDto.BookCsvDto;
+import com.bookstore.dto.csvDto.BookCsvDto;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

@@ -22,7 +22,8 @@ public class Award {
     @Column(name = "award")
     private String name;
 
-    @OneToMany(mappedBy = "award", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "award",
+            fetch = FetchType.LAZY)
     private List<BookAward> awards;
 
     public Award(String award) {this.name = award;}

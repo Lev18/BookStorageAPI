@@ -1,8 +1,8 @@
 package com.bookstore.service.mapper;
 
 import com.bookstore.entity.Book;
-import com.bookstore.service.csvDto.BookCsvDto;
-import com.bookstore.service.enums.Language;
+import com.bookstore.dto.csvDto.BookCsvDto;
+import com.bookstore.enums.Language;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

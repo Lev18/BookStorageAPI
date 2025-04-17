@@ -1,13 +1,11 @@
 package com.bookstore.utils;
 
-import com.bookstore.service.exception.NoSuchAlgorithmForHash;
+import com.bookstore.exception.NoSuchAlgorithmForHash;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Base64;
 
 public class HashUtils {

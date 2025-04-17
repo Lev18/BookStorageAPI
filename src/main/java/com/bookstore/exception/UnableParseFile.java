@@ -1,4 +1,4 @@
-package com.bookstore.service.exception;
+package com.bookstore.exception;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

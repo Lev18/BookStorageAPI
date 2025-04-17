@@ -21,7 +21,8 @@ public class Setting {
     @Column(name = "setting_name")
     private String setting;
     
-    @OneToMany(mappedBy="setting")
+    @OneToMany(mappedBy="setting",
+            cascade = CascadeType.REMOVE)
     private List<BookSetting> bookSettings;
 
     public Setting(String setting) {

@@ -1,7 +1,7 @@
 package com.bookstore.service.mapper;
 
 import com.bookstore.entity.Genre;
-import com.bookstore.service.csvDto.BookCsvDto;
+import com.bookstore.dto.csvDto.BookCsvDto;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,15 +22,16 @@ public class BookToGenreMapper {
 
         for (String genre : bookCsvDto.getGenres()) {
             String cleanGenre = genre.replaceAll("'","").trim().toLowerCase();
-            Genre newgenre = new Genre(cleanGenre);
 
+            Genre newGenre = new Genre(cleanGenre);
             Genre existingGenre = genresExist.get(cleanGenre);
+
             if (existingGenre != null) {
                 genres.add(existingGenre);
             } else {
-                allNewGenres.add(newgenre);
-                genres.add(newgenre);
-                genresExist.put(cleanGenre, newgenre);
+                allNewGenres.add(newGenre);
+                genres.add(newGenre);
+                genresExist.put(cleanGenre, newGenre);
             }
         }
 
