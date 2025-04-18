@@ -2,6 +2,7 @@ package com.bookstore.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 @Table(name = "book_author")
 @Getter
 @Setter
+@NoArgsConstructor
 public class BookAuthor {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_author_seq")
@@ -24,4 +26,9 @@ public class BookAuthor {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     Author author;
+
+    public BookAuthor(Book book, Author a) {
+        this.book = book;
+        this.author = a;
+    }
 }

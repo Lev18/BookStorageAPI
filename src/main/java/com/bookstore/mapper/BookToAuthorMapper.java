@@ -1,5 +1,6 @@
 package com.bookstore.mapper;
 
+import com.bookstore.dto.responceDto.BookInfoDTO;
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
 import com.bookstore.dto.csvDto.BookCsvDto;
@@ -28,14 +29,16 @@ public class BookToAuthorMapper {
                 allAuthors.add(exisingAuthor);
             } else {
                 allAuthors.add(author);
-                synchronized (author) {
                     newAuthors.add(author);
                     authorsExists.put(author.getAuthorName().trim().toLowerCase(), author);
-                }
             }
         }
 
         return allAuthors;
+    }
+
+    public List<Author> mapBookDtoToAuthor(BookInfoDTO bookInfoDTO) {
+        return null;
     }
 }
 

@@ -17,7 +17,7 @@ public class UpdateBookController {
     private final BookService bookService;
 
     @PutMapping(path = "/book/update/rating/{bookIsbn}/{newRate}")
-    public ResponseEntity<?> updateBookRating(@PathVariable String bookIsbn, @PathVariable String newRate) {
+    public ResponseEntity<?> updateBookRating(@PathVariable String bookIsbn, @PathVariable Integer newRate) {
         Book updatedBook = bookService.updateBookRating(bookIsbn, newRate);
         if (updatedBook == null) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Book not found\n");

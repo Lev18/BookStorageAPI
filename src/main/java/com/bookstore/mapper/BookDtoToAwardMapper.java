@@ -31,13 +31,12 @@ public class BookDtoToAwardMapper {
             Award newAward = awardExist.get(normalized);
             if (newAward == null) {
                 newAward = new Award(normalized);
-                synchronized (newAward) {
                     newAwards.add(newAward);
                     awardExist.put(normalized, newAward);
-                }
             }
             allAwards.put(original.trim().replaceAll("'", ""), newAward);
         }
         return allAwards;
     }
+
 }

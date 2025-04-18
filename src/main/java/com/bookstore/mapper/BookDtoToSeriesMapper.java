@@ -22,9 +22,7 @@ public class BookDtoToSeriesMapper {
         }
         String cleanTitle = bookCsvDto.getTitle().toLowerCase().trim();
         Series newSeries = allSeriesExist.computeIfAbsent(cleanTitle, Series::new);
-        synchronized (newSeries) {
             allNewSeries.add(newSeries);
-        }
         return newSeries;
     }
 }

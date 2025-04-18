@@ -26,10 +26,8 @@ public class BookDtoToCharacterMapper {
                 Characters character = charactersMap.get(cleanCharacter);
                 if (character == null) {
                     character = new Characters(cleanCharacter);
-                    synchronized (character) {
                         newCharacters.add(character);
                         charactersMap.put(cleanCharacter, character);
-                    }
                 }
                 allCharacters.add(character);
             }

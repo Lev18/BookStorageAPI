@@ -13,7 +13,6 @@ import java.util.Set;
 @Getter
 @Setter
 public class Book {
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_seq")
     @SequenceGenerator(name = "book_seq", sequenceName = "book_seq", allocationSize = 100)
@@ -80,11 +79,6 @@ public class Book {
     @OneToMany(mappedBy = "book")
     private Set<BookGenre> genres;
 
-    @OneToMany(mappedBy = "book",
-            cascade = CascadeType.REMOVE,
-            orphanRemoval = true)
-    private List<BookSetting> settings;
-
     @OneToMany(mappedBy = "ratingStars")
     private List<RatingByStars> stars;
 
@@ -94,7 +88,8 @@ public class Book {
     @OneToMany(mappedBy = "book")
     private List<BookFormat> formats;
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "book",
+            fetch = FetchType.LAZY)
     private Set<BookSetting> bookSettings;
 
     @ManyToOne(fetch = FetchType.LAZY)

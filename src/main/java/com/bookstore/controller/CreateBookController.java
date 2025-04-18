@@ -1,5 +1,6 @@
 package com.bookstore.controller;
 
+import com.bookstore.dto.responceDto.BookInfoDTO;
 import com.bookstore.entity.Book;
 import com.bookstore.service.BookService;
 import com.bookstore.service.BookUploadService;
@@ -40,9 +41,18 @@ public class CreateBookController {
 
     @PostMapping (path = "/image/download")
     public ResponseEntity<?> uploadImg() throws InterruptedException {
+        // TODO:
         bookService.uploadImg();
         return ResponseEntity.ok(" images was downloaded successfully");
     }
 
+    @PostMapping(path = "/book/insert/")
+    public ResponseEntity<?> insertBook(@RequestBody BookInfoDTO bookInfoDTO) {
+        int savedBooks = bookService.insetNewBook(bookInfoDTO);
+        if (savedBooks == 0) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        return ResponseEntity.ok(savedBooks + " new  books were saved\n");
+    }
 }
 

@@ -2,12 +2,14 @@ package com.bookstore.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "book_awards")
 @Getter
 @Setter
+@NoArgsConstructor
 public class BookAward {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_award_seq")
@@ -24,4 +26,10 @@ public class BookAward {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "award_id")
     Award award;
+
+    public BookAward(Book book, Award value, String key) {
+        this.book = book;
+        this.award = value;
+        this.bookAward = key;
+    }
 }

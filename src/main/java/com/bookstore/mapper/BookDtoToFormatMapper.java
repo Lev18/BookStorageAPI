@@ -10,13 +10,12 @@ import java.util.*;
 @Component
 @AllArgsConstructor
 public class BookDtoToFormatMapper {
-//    private final FormatRepository formatRepository;
-
     public List<Format> mapBookToFormat(BookCsvDto bookDto,
                                         Map<String, Format> allFormatExists,
                                         List<Format> allNewFormats) {
-        List<Format> formats = Arrays.stream(bookDto.getBookFormat()
-                        .split(", "))
+        List<Format> formats = Arrays.stream(bookDto.getBookFormat().split(", "))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
                 .map(Format::new)
                 .toList();
 
@@ -28,10 +27,8 @@ public class BookDtoToFormatMapper {
                 allFormats.add(existFormat);
             } else {
                 allFormats.add(format);
-                synchronized (format) {
                     allNewFormats.add(format);
                     allFormatExists.put(format.getFormat().toLowerCase(), format);
-                }
             }
         }
 

@@ -26,9 +26,7 @@ public class BookToGenreMapper {
 
             Genre existingGenre = genresExist.computeIfAbsent(cleanGenre, key-> {
                Genre newGenre = new Genre(cleanGenre);
-               synchronized (newGenre) {
                    allNewGenres.add(newGenre);
-               }
                return newGenre;
             });
             genres.add(existingGenre);

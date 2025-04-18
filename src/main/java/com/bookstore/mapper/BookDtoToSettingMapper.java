@@ -24,10 +24,8 @@ public class BookDtoToSettingMapper {
                 Setting setting = allSettingExists.get(cleanSetting);
                 if (setting == null) {
                     setting = new Setting(cleanSetting);
-                    synchronized (setting) {
                         newSettings.add(setting);
                         allSettingExists.put(cleanSetting, setting);
-                    }
                 }
                 allSettings.add(setting);
             }

@@ -2,12 +2,14 @@ package com.bookstore.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "book_publisher")
 @Getter
 @Setter
+@NoArgsConstructor
 public class BookPublisher {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_publisher_seq")
@@ -22,4 +24,9 @@ public class BookPublisher {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publisher_id")
     private Publisher publisher;
+
+    public BookPublisher(Book book, Publisher p) {
+        this.book = book;
+        this.publisher = p;
+    }
 }

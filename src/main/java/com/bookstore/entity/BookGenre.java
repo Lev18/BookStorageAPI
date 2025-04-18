@@ -2,12 +2,14 @@ package com.bookstore.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "book_genres")
 @Setter
 @Getter
+@NoArgsConstructor
 public class BookGenre {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_genre_seq")
@@ -21,5 +23,10 @@ public class BookGenre {
     @ManyToOne(fetch = FetchType.LAZY,
             cascade = CascadeType.REMOVE)
     @JoinColumn(name = "genre_id")
-    private Genre genre; 
+    private Genre genre;
+
+    public BookGenre(Book book, Genre g) {
+        this.book = book;
+        this.genre = g;
+    }
 }

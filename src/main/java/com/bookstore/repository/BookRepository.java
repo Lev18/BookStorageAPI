@@ -37,6 +37,8 @@ public interface BookRepository extends JpaRepository<Book, String> {
             "characters.character",
             "author",
             "author.author",
+            "bookSettings",
+            "bookSettings.setting"
     })
     @Query("SELECT b FROM Book b WHERE b.isbn = :bookIsbn")
     Book findBookWithAttributes(@Param("bookIsbn") String isbn);

@@ -24,4 +24,9 @@ public class BookCharacter {
             cascade = CascadeType.REMOVE)
     @JoinColumn(name = "character_id")
     private Characters character;
+
+    public BookCharacter(Book book, Characters c) {
+        this.book = book;
+        this.character = c;
+    }
 }
