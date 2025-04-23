@@ -1,6 +1,6 @@
 package com.bookstore.mapper;
 
-import com.bookstore.dto.responceDto.BookInfoDTO;
+import com.bookstore.dto.responseDto.BookInfoDTO;
 import com.bookstore.entity.Author;
 import com.bookstore.repository.AuthorRepository;
 import com.bookstore.dto.csvDto.BookCsvDto;
@@ -24,13 +24,13 @@ public class BookToAuthorMapper {
         List<Author> allAuthors = new ArrayList<>();
 
         for (Author author : authors) {
-            Author exisingAuthor = authorsExists.get(author.getAuthorName().trim().toLowerCase());
+            Author exisingAuthor = authorsExists.get(author.getName().trim().toLowerCase());
             if (exisingAuthor != null) {
                 allAuthors.add(exisingAuthor);
             } else {
                 allAuthors.add(author);
                     newAuthors.add(author);
-                    authorsExists.put(author.getAuthorName().trim().toLowerCase(), author);
+                    authorsExists.put(author.getName().trim().toLowerCase(), author);
             }
         }
 

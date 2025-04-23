@@ -17,15 +17,15 @@ public class Publisher {
     private Long id;
 
     @Column(name = "publisher_name")
-    private String publisherName;
+    private String name;
 
     @OneToMany(mappedBy = "publisher")
     List<BookPublisher> bookPublishers;
 
     private Publisher(){}
 
-    public Publisher(String publisherName) {
-        this.publisherName = publisherName;
+    public Publisher(String name) {
+        this.name = name;
     }
 
     @Override
@@ -33,11 +33,11 @@ public class Publisher {
         if (this == obj) return true;
         if (obj == null || this.getClass() != obj.getClass()) return false;
         Publisher genre = (Publisher) obj;
-        return Objects.equals(this.publisherName, ((Publisher) obj).publisherName);
+        return Objects.equals(this.name, ((Publisher) obj).name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(publisherName);
+        return Objects.hash(name);
     }
 }

@@ -67,6 +67,9 @@ public class Book {
     @Column(name = "price")
     private String price;
 
+    @Column(name = "series_number")
+    private String seriesNumber;
+
     @OneToMany(mappedBy = "book")
     private List<BookPublisher> bookPublishers;
 

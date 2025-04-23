@@ -12,20 +12,19 @@ public class BookToPublisherMapper {
     public List<Publisher> bookToPublisherMapper(BookCsvDto bookDto,
                                            Map<String, Publisher> allPublishersExist,
                                            List<Publisher> allNewPublishers) {
-        List<Publisher> publishers = Arrays.stream(bookDto.getPublisher().split("/"))
-                                           .map(Publisher::new)
+        List<String> publishers = Arrays.stream(bookDto.getPublisher().split("/"))
                                            .toList();
         List<Publisher> allPublishers = new ArrayList<>();
 
-        for (Publisher publisher : publishers) {
-            Publisher existPublisher = allPublishersExist.get(publisher.getPublisherName().toLowerCase());
-            if (existPublisher != null) {
-                allPublishers.add(existPublisher);
-            } else {
-                allPublishers.add(publisher);
-                allNewPublishers.add(publisher);
-                allPublishersExist.put(publisher.getPublisherName(), publisher);
-            }
+        for (String publisher : publishers) {
+            String cleanString = publisher.trim().toLowerCase();
+            Publisher existPublisher = allPublishersExist.computeIfAbsent(cleanString, key-> {
+                Publisher newPublisher = new Publisher(cleanString);
+                allNewPublishers.add(newPublisher);
+                return newPublisher;
+            });
+
+            allPublishers.add(existPublisher);
         }
         return  allPublishers;
     }

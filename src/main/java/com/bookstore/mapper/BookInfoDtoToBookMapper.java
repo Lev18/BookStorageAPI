@@ -1,6 +1,6 @@
 package com.bookstore.mapper;
 
-import com.bookstore.dto.responceDto.BookInfoDTO;
+import com.bookstore.dto.responseDto.BookInfoDTO;
 import com.bookstore.entity.Book;
 import com.bookstore.enums.Language;
 import com.bookstore.repository.BookRepository;

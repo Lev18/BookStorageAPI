@@ -9,15 +9,14 @@ import com.bookstore.service.fileReader.CsvReaderService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.list.SynchronizedList;
-import org.apache.commons.lang3.concurrent.Computable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class BookUploadService {
 
-    final int BATCH_SIZE = 1000;
+    final int BATCH_SIZE = 2000;
     private final CsvReaderService csvReaderService;
     private final BookDtoToBookDBMapper bookDtoToBookDBMapper;
     // TODO: collect into BookMapperService class
@@ -61,34 +60,33 @@ public class BookUploadService {
 
 
     @Transactional
-    @Async
     public int saveBook(List<BookCsvDto> bookCsvDtos) {
 
-        List<Book> allBooks                         = Collections.synchronizedList(new ArrayList<>());
-        List<BookGenre> allNewBookGenres            = Collections.synchronizedList(new ArrayList<>());
-        List<BookAuthor> allNewBookAuthor           = Collections.synchronizedList(new ArrayList<>());
-        List<BookFormat> allNewBookFormat           = Collections.synchronizedList(new ArrayList<>());
-        List<BookAward> allNewBookAward             = Collections.synchronizedList(new ArrayList<>());
-        List<BookPublisher> allNewBookPublishers    = Collections.synchronizedList(new ArrayList<>());
+        List<Book> allBooks = Collections.synchronizedList(new ArrayList<>());
+        List<BookGenre> allNewBookGenres = Collections.synchronizedList(new ArrayList<>());
+        List<BookAuthor> allNewBookAuthor = Collections.synchronizedList(new ArrayList<>());
+        List<BookFormat> allNewBookFormat = Collections.synchronizedList(new ArrayList<>());
+        List<BookAward> allNewBookAward = Collections.synchronizedList(new ArrayList<>());
+        List<BookPublisher> allNewBookPublishers = Collections.synchronizedList(new ArrayList<>());
         List<SeriesCharacter> allNewSeriesCharacter = Collections.synchronizedList(new ArrayList<>());
-        List<BookSetting> allNewBookSettings        = Collections.synchronizedList(new ArrayList<>());
+        List<BookSetting> allNewBookSettings = Collections.synchronizedList(new ArrayList<>());
 
-        List<Publisher> allNewPublishers         = Collections.synchronizedList(new ArrayList<>());
+        List<Publisher> allNewPublishers = Collections.synchronizedList(new ArrayList<>());
         List<BookCharacter> allNewBookCharacters = Collections.synchronizedList(new ArrayList<>());
-        List<Genre> allNewGenres                 = Collections.synchronizedList(new ArrayList<>());
-        List<Format> allNewFormats               = Collections.synchronizedList(new ArrayList<>());
-        List<Author> allNewAuthors               = Collections.synchronizedList(new ArrayList<>());
-        List<Award> allNewAwards                 = Collections.synchronizedList(new ArrayList<>());
-        List<Setting> allNewSettings             = Collections.synchronizedList(new ArrayList<>());
-        List<Characters> allNewCharacters        = Collections.synchronizedList(new ArrayList<>());
-        List<Series> allNewSeries                = Collections.synchronizedList(new ArrayList<>());
-        Set<String> uniqueIsbn                   = Collections.synchronizedSet(new HashSet<>());
+        List<Genre> allNewGenres = Collections.synchronizedList(new ArrayList<>());
+        List<Format> allNewFormats = Collections.synchronizedList(new ArrayList<>());
+        List<Author> allNewAuthors = Collections.synchronizedList(new ArrayList<>());
+        List<Award> allNewAwards = Collections.synchronizedList(new ArrayList<>());
+        List<Setting> allNewSettings = Collections.synchronizedList(new ArrayList<>());
+        List<Characters> allNewCharacters = Collections.synchronizedList(new ArrayList<>());
+        List<Series> allNewSeries = Collections.synchronizedList(new ArrayList<>());
+        Set<String> uniqueIsbn = Collections.synchronizedSet(new HashSet<>());
 
         Set<RatingByStars> ratingByStars = Collections.synchronizedSet(new HashSet<>());
 
-
         Map<String, Author> allExistingAuthors = authorRepository.findAll().stream()
-                .collect(Collectors.toConcurrentMap(author -> author.getAuthorName()
+                .filter(author -> author != null && author.getName() != null)
+                .collect(Collectors.toConcurrentMap(author -> author.getName()
                                 .toLowerCase().trim(),
                         author -> author));
 
@@ -112,7 +110,7 @@ public class BookUploadService {
 
 
         Map<String, Genre> allExistingGenres = genreRepository.findAll().stream()
-                .collect(Collectors.toConcurrentMap(genre -> genre.getGenreTitle()
+                .collect(Collectors.toConcurrentMap(genre -> genre.getName()
                                 .toLowerCase().trim(),
                         genre -> genre));
 
@@ -123,7 +121,7 @@ public class BookUploadService {
                         format -> format));
 
         Map<String, Publisher> allPublisherExists = publisherRepository.findAll().stream()
-                .collect(Collectors.toConcurrentMap(publisher -> publisher.getPublisherName()
+                .collect(Collectors.toConcurrentMap(publisher -> publisher.getName()
                                 .toLowerCase().trim(),
                         publisher -> publisher));
 
@@ -137,7 +135,7 @@ public class BookUploadService {
             batches.add(bookCsvDtos.subList(i, Math.min(i + BATCH_SIZE, bookCsvDtos.size())));
         }
 
-
+        ExecutorService executor = Executors.newFixedThreadPool(22);
         //renaming this variable name
         List<CompletableFuture<Void>> futures = batches.stream().map(
                 batch -> CompletableFuture.runAsync(() -> {
@@ -147,22 +145,22 @@ public class BookUploadService {
 
                             Book book = bookDtoToBookDBMapper.bookDtoToBookMapper(bookCsvDto);
                             Series series = bookDtoToSeriesMapper.mapBookToSeries(bookCsvDto,
-                                                                        allSeriesExists, allNewSeries);
+                                    allSeriesExists, allNewSeries);
                             if (series != null) book.setSeries(series);
 
                             allBooks.add(book);
                             ratingByStars.addAll(book.getStars());
 
                             allNewBookAuthor.addAll(bookToAuthorMapper.bookToAuthorMapper(bookCsvDto,
-                                    allExistingAuthors, allNewAuthors).stream()
+                                            allExistingAuthors, allNewAuthors).stream()
                                     .map(author -> new BookAuthor(book, author)).toList());
 
                             allNewBookGenres.addAll(bookToGenreMapper.findOrCreateGenre(bookCsvDto,
-                                    allExistingGenres, allNewGenres).stream()
+                                            allExistingGenres, allNewGenres).stream()
                                     .map(genre -> new BookGenre(book, genre)).toList());
 
                             allNewBookFormat.addAll(bookDtoToFormatMapper.mapBookToFormat(bookCsvDto,
-                                    allFormatExists, allNewFormats).stream()
+                                            allFormatExists, allNewFormats).stream()
                                     .map(format -> new BookFormat(book, format)).toList());
 
                             bookDtoToAwardMapper.bookToAwardMapper(bookCsvDto,
@@ -178,49 +176,51 @@ public class BookUploadService {
                                     allNewSeriesCharacter.add(new SeriesCharacter(series, c));
                                 }
                             }
-
                             allNewBookSettings.addAll(bookDtoToSettingMapper.mapBookDtoToSetting(bookCsvDto,
-                                    allExistingSettings, allNewSettings).stream()
+                                            allExistingSettings, allNewSettings).stream()
                                     .map(setting -> new BookSetting(book, setting)).toList());
 
                             allNewBookPublishers.addAll(bookDtoToPublisherMapper.bookToPublisherMapper(bookCsvDto,
-                                    allPublisherExists, allNewPublishers).stream()
+                                            allPublisherExists, allNewPublishers).stream()
                                     .map(publisher -> new BookPublisher(book, publisher)).toList());
                         } catch (Exception e) {
                             log.error("Error processing book DTO: {}", bookCsvDto, e);
                         }
                     }
 
-                })
+                }, executor)
         ).toList();
 
         futures.forEach(CompletableFuture::join);
 
         // Persist results
-        if (!allNewSeries.isEmpty()) seriesRepository.saveAll(allNewSeries);
-        if (!allBooks.isEmpty()) bookRepository.saveAll(allBooks);
-        if (!allNewGenres.isEmpty()) genreRepository.saveAll(allNewGenres);
-        if (!allNewAuthors.isEmpty()) authorRepository.saveAll(allNewAuthors);
-        if (!allNewFormats.isEmpty()) formatRepository.saveAll(allNewFormats);
-        if (!allNewPublishers.isEmpty()) publisherRepository.saveAll(allNewPublishers);
-        if (!allNewAwards.isEmpty()) awardsRepository.saveAll(allNewAwards);
-        if (!allNewCharacters.isEmpty()) charactersRepository.saveAll(allNewCharacters);
-        if (!allNewSettings.isEmpty()) settingRepository.saveAll(allNewSettings);
+        seriesRepository.saveAll(allNewSeries);
+        bookRepository.saveAll(allBooks);
 
-        if (!allNewBookGenres.isEmpty()) bookGenreRepository.saveAll(allNewBookGenres);
-        if (!allNewBookAuthor.isEmpty()) bookAuthorRepository.saveAll(allNewBookAuthor);
-        if (!allNewBookFormat.isEmpty()) bookFormatRepository.saveAll(allNewBookFormat);
-        if (!allNewBookAward.isEmpty()) bookAwardRepository.saveAll(allNewBookAward);
-        if (!allNewBookCharacters.isEmpty()) bookCharacterRepository.saveAll(allNewBookCharacters);
-        if (!allNewBookSettings.isEmpty()) bookSettingRepository.saveAll(allNewBookSettings);
-        if (!allNewBookPublishers.isEmpty()) bookPublisherRepository.saveAll(allNewBookPublishers);
-        if (!allNewSeriesCharacter.isEmpty()) seriesCharacterRepository.saveAll(allNewSeriesCharacter);
-        if (!ratingByStars.isEmpty()) ratingByStarsRepository.saveAll(ratingByStars);
+        CompletableFuture.allOf(
 
+            CompletableFuture.runAsync(()->genreRepository.saveAll(allNewGenres)),
+            CompletableFuture.runAsync(()->authorRepository.saveAll(allNewAuthors)),
+            CompletableFuture.runAsync(()->formatRepository.saveAll(allNewFormats)),
+            CompletableFuture.runAsync(()->publisherRepository.saveAll(allNewPublishers)),
+            CompletableFuture.runAsync(()->awardsRepository.saveAll(allNewAwards)),
+            CompletableFuture.runAsync(()->charactersRepository.saveAll(allNewCharacters)),
+            CompletableFuture.runAsync(()->settingRepository.saveAll(allNewSettings))
+                ).join();
+        CompletableFuture.allOf(
+            CompletableFuture.runAsync(()->bookGenreRepository.saveAll(allNewBookGenres)),
+            CompletableFuture.runAsync(()->bookAuthorRepository.saveAll(allNewBookAuthor)),
+            CompletableFuture.runAsync(()->bookFormatRepository.saveAll(allNewBookFormat)),
+            CompletableFuture.runAsync(()->bookAwardRepository.saveAll(allNewBookAward)),
+            CompletableFuture.runAsync(()->bookCharacterRepository.saveAll(allNewBookCharacters)),
+            CompletableFuture.runAsync(()->bookSettingRepository.saveAll(allNewBookSettings)),
+            CompletableFuture.runAsync(()->bookPublisherRepository.saveAll(allNewBookPublishers)),
+            CompletableFuture.runAsync(()->seriesCharacterRepository.saveAll(allNewSeriesCharacter)),
+            CompletableFuture.runAsync(()->ratingByStarsRepository.saveAll(ratingByStars))
+        ).join();
         return allBooks.size();
     }
 
-    // ResponseEntity<?> move to controller
     public int uploadAndSaveFile(MultipartFile file) throws UnableParseFile {
         List<BookCsvDto> csvDTos = csvReaderService.uploadBooks(file);
 

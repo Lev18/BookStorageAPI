@@ -1,6 +1,5 @@
-package com.bookstore.dto.responceDto;
+package com.bookstore.dto.responseDto;
 
-import com.bookstore.enums.Language;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

@@ -18,8 +18,8 @@ public class Author {
     @SequenceGenerator(name = "author_seq", sequenceName = "author_seq", allocationSize = 100)
     private Long id;
 
-    @Column(name = "author_name")
-    private String authorName;
+    @Column(name = "name")
+    private String name;
 
     @OneToMany(mappedBy = "author",
                 fetch = FetchType.LAZY)
@@ -29,7 +29,7 @@ public class Author {
     }
 
     public Author(String author) {
-        this.authorName=author;
+        this.name=author;
     }
 
     @Override
@@ -37,11 +37,11 @@ public class Author {
         if (this == obj) return  true;
         if (obj == null || getClass() !=obj.getClass()) return  false;
         Author author = (Author) obj;
-        return Objects.equals(this.authorName, author.authorName);
+        return Objects.equals(this.name, author.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(authorName.trim());
+        return Objects.hash(name.trim());
     }
 }

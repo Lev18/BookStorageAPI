@@ -23,7 +23,6 @@ public class BookToGenreMapper {
         for (String genre : bookCsvDto.getGenres()) {
             String cleanGenre = genre.replaceAll("'","").trim().toLowerCase();
 
-
             Genre existingGenre = genresExist.computeIfAbsent(cleanGenre, key-> {
                Genre newGenre = new Genre(cleanGenre);
                    allNewGenres.add(newGenre);

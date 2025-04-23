@@ -178,12 +178,17 @@ Ref: characters.id < series_character.character_id
 //Ref: "series"."id" < "series"."ser_name"
 
 
-numRating move to + // make it dynamic don't keep in db
-how make series unique // title + series is unique
-language create enum  +
-separate awards from years and book(many to many) +
-liked percent is static we can calculate dynamically +
 
-series should be separate table many to one
-keep only year in  bookaward table
-publisher many to many
+controllers should be in one class
+should be proconsular
+/api/books/
+custom errors exceptions in controller
+getAllGenres go to repository
+/book/author/publisher
+/if i want resource by identifier  should throws an error if it doesn't exist
+
+/ book global api for book updates for every resource (book author publisher)
+/download images async with bookcsv upload in db
+// rename exceptions name add Exception into them
+// url checking
+//  

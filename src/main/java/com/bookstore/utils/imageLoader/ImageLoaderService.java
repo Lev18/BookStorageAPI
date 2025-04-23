@@ -21,6 +21,7 @@ public class ImageLoaderService {
 
     @Async
     public void downloadImage(String url) {
+        //TODO: find validation method for url
         if (!url.isBlank() && !url.equals("\"\"")) {
             try (InputStream in = new URL(url)
                                  .openStream()) {
@@ -50,6 +51,7 @@ public class ImageLoaderService {
     public File getFile(String url, String directory) {
         String[] urlParts = url.split("/");
         FileSystemView view = FileSystemView.getFileSystemView();
+        // move to application properties
         String ImageFilePath = view.getHomeDirectory().getPath() + "/Workspace/ImagesBook/" + directory;
         File outputFile = new File(ImageFilePath + "/" +
                 urlParts[urlParts.length - 2] + "/" +

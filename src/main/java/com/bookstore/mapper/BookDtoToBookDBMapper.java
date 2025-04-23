@@ -30,6 +30,14 @@ public class BookDtoToBookDBMapper {
             book.setBbeScore(bookDto.getBbeScore());
             book.setBbeVotes(bookDto.getBbeVotes());
             book.setPrice(bookDto.getPrice());
+            if (!bookDto.getSeries().isBlank() && !bookDto.getSeries().equals("\"\"")) {
+                    if (bookDto.getSeries().contains("#")) {
+                            book.setSeriesNumber(bookDto.getSeries().split("#")[1].trim());
+                    }
+                    else {
+                         book.setSeriesNumber(bookDto.getSeries());
+                    }
+            }
 
             //  relational databases configurations
             book.setStars(ratingMapper.bookToRatingsMapper(bookDto, book));

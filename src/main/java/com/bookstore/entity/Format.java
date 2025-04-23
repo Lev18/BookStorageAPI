@@ -20,7 +20,7 @@ public class Format {
     @SequenceGenerator(name = "format_seq", sequenceName = "format_seq", allocationSize = 100)
     private Long id;
 
-    @Column(name = "format")
+    @Column(name = "format", unique = true)
     private String format;
 
     @OneToMany(mappedBy = "format", fetch = FetchType.LAZY)

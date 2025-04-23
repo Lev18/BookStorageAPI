@@ -19,15 +19,15 @@ public class Genre {
     private Long id;
 
     @Column(name = "genres", nullable = false, unique = true)
-    private String genreTitle;
+    private String name;
     
     @OneToMany(mappedBy="genre")
     List<BookGenre> genres;
 
     private Genre() {}
 
-    public Genre(String genreTitle) {
-        this.genreTitle = genreTitle;
+    public Genre(String name) {
+        this.name = name;
     }
 
     @Override
@@ -35,12 +35,12 @@ public class Genre {
         if (this == obj) return true;
         if (obj == null || this.getClass() != obj.getClass()) return false;
         Genre genre = (Genre)obj;
-        return Objects.equals(this.genreTitle, ((Genre) obj).genreTitle);
+        return Objects.equals(this.name, ((Genre) obj).name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(genreTitle);
+        return Objects.hash(name);
     }
 
 }

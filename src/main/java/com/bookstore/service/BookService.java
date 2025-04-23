@@ -1,12 +1,14 @@
 package com.bookstore.service;
 
+import com.bookstore.criteria.BookSearchCriteria;
 import com.bookstore.dto.requestDto.AwardDto;
+import com.bookstore.dto.responseDto.BookResponseDto;
 import com.bookstore.entity.*;
 import com.bookstore.exception.ImageNotFound;
 import com.bookstore.mapper.BookInfoDtoToBookMapper;
 import com.bookstore.repository.*;
-import com.bookstore.dto.responceDto.BookInfoDTO;
-import com.bookstore.dto.responceDto.GenreInfoDTO;
+import com.bookstore.dto.responseDto.BookInfoDTO;
+import com.bookstore.dto.responseDto.GenreInfoDTO;
 import com.bookstore.utils.imageLoader.ImageLoaderService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -24,7 +26,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -97,6 +98,10 @@ public class BookService {
         String img = urlComponents[urlComponents.length - 1];
         String directory = urlComponents[urlComponents.length - 2];
 
+        // move to application properties
+        // how get original or resized
+        // with parameter enum
+        // truck uploaded images keep also download status in db keep images
         Path path = Paths.get("/home/levon/Workspace/ImagesBook/resized/" + directory + "/" + img);
         try (InputStream in = path.toUri().toURL()
                 .openStream()) {
@@ -112,8 +117,8 @@ public class BookService {
                 = entityManager.createQuery(
                 "select new GenreInfoDTO(b.title, g.genreTitle, b.isbn) " +
                         "from Book b " +
-                        "join BookGenre bg on b.id = bg.book.id " +
-                        "join Genre g on g.id = bg.genre.id " +
+                        "left join b.genres bg" +
+                        "left join Genre g on g.id = bg.genre.id " +
                         "where genreTitle = :genreTitle " +
                         "order by bg.id ",
                 GenreInfoDTO.class
@@ -135,7 +140,7 @@ public class BookService {
 
         List<String> genres = book.getGenres()
                 .stream()
-                .map(bg -> bg.getGenre().getGenreTitle())
+                .map(bg -> bg.getGenre().getName())
                 .toList();
 
         List<String> awards = book.getAwards()
@@ -152,7 +157,7 @@ public class BookService {
         Double rating = countBookRating(book);
         List<String> author = book.getAuthor()
                 .stream()
-                .map(bookAuthor -> bookAuthor.getAuthor().getAuthorName())
+                .map(bookAuthor -> bookAuthor.getAuthor().getName())
                 .toList();
 
         List<String> settings = book.getBookSettings()
@@ -218,7 +223,7 @@ public class BookService {
     }
 
     public Genre deleteGenre(String genreName) {
-        Genre genre = genreRepository.findByGenreTitle(genreName);
+        Genre genre = genreRepository.findByName(genreName);
         genreRepository.deleteBookGenresByGenreId(genre.getId());
         genreRepository.delete(genre);
         return genre;
@@ -363,4 +368,9 @@ public class BookService {
 //
        return 0;
    }
+
+    public void findAllByCriteria(BookSearchCriteria bookSearchCriteria) {
+        List<BookResponseDto> books = bookRepository.findAll(bookSearchCriteria);
+
+    }
 }
