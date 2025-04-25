@@ -17,8 +17,8 @@ public class Characters {
     @SequenceGenerator(name = "character_seq", sequenceName = "character_seq", allocationSize = 100)
     private Long id;
 
-    @Column(name = "character_name")
-    private String characterName;
+    @Column(name = "name")
+    private String name;
 
     @OneToMany(mappedBy = "character")
     private List<BookCharacter> bookCharacters;
@@ -30,7 +30,7 @@ public class Characters {
     }
 
     public Characters(String character) {
-        this.characterName= character;
+        this.name= character;
     }
 
     @Override
@@ -38,11 +38,11 @@ public class Characters {
         if (this == obj) return  true;
         if (obj == null || getClass() !=obj.getClass()) return  false;
         Characters character = (Characters) obj;
-        return Objects.equals(this.characterName, character.characterName);
+        return Objects.equals(this.name, character.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(characterName.trim());
+        return Objects.hash(name.trim());
     }
 }

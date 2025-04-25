@@ -2,20 +2,22 @@ package com.bookstore.service;
 
 import com.bookstore.criteria.BookSearchCriteria;
 import com.bookstore.dto.requestDto.AwardDto;
-import com.bookstore.dto.responseDto.BookResponseDto;
+import com.bookstore.dto.responseDto.*;
 import com.bookstore.entity.*;
 import com.bookstore.exception.ImageNotFound;
-import com.bookstore.mapper.BookInfoDtoToBookMapper;
 import com.bookstore.repository.*;
-import com.bookstore.dto.responseDto.BookInfoDTO;
-import com.bookstore.dto.responseDto.GenreInfoDTO;
 import com.bookstore.utils.imageLoader.ImageLoaderService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.data.domain.Page;
+
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -26,6 +28,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -35,27 +38,10 @@ public class BookService {
     private final EntityManager entityManager;
 
     private final BookRepository bookRepository;
-    private final AuthorRepository authorRepository;
-    private final BookAuthorRepository bookAuthorRepository;
     private final AwardsRepository awardsRepository;
     private final BookAwardRepository bookAwardRepository;
-    private final BookCharactersRepository bookCharacterRepository;
-    private final BookGenreRepository bookGenreRepository;
     private final GenreRepository genreRepository;
-    private final FormatRepository formatRepository;
     private final RatingByStarsRepository ratingByStarsRepository;
-    private final SeriesRepository seriesRepository;
-
-    private final BookFormatRepository bookFormatRepository;
-    private final CharactersRepository charactersRepository;
-    private final PublisherRepository publisherRepository;
-    private final SettingRepository settingRepository;
-    private final BookSettingRepository bookSettingRepository;
-    private final BookPublisherRepository bookPublisherRepository;
-    private final SeriesCharacterRepository seriesCharacterRepository;
-
-
-    private final BookInfoDtoToBookMapper bookInfoDtoToBookMapper;
 
     public Book updateBookRating(String bookIsbn, Integer newRate) {
         Book book = bookRepository.findBookByIsbn(bookIsbn);
@@ -130,42 +116,40 @@ public class BookService {
     }
 
     public BookInfoDTO getBookByISBN(String id) {
-
-//        Book bookGenre = bookRepository.findBookWithGenres(id);
-//        Book bookAward = bookRepository.findBookWithAwards(id);
         Book book = bookRepository.findBookWithAttributes(id);
         if (book == null) {
             return null;
         }
 
-        List<String> genres = book.getGenres()
+        Set<String> genres = book.getGenres()
                 .stream()
                 .map(bg -> bg.getGenre().getName())
-                .toList();
+                .collect(Collectors.toSet());
 
-        List<String> awards = book.getAwards()
+        Set<String> awards = book.getAwards()
                 .stream()
                 .map(BookAward::getBookAward)
-                .toList();
+                .collect(Collectors.toSet());
 
-        List<String> characters = book.getCharacters()
+        Set<String> characters = book.getCharacters()
                 .stream()
                 .map(bookCharacter -> bookCharacter.getCharacter()
-                        .getCharacterName())
-                .toList();
+                        .getName())
+                .collect(Collectors.toSet());
 
         Double rating = countBookRating(book);
-        List<String> author = book.getAuthor()
+        Set<String> author = book.getAuthor()
                 .stream()
                 .map(bookAuthor -> bookAuthor.getAuthor().getName())
-                .toList();
+                .collect(Collectors.toSet());
 
-        List<String> settings = book.getBookSettings()
+        Set<String> settings = book.getBookSettings()
                 .stream()
                 .map(bookSetting -> bookSetting.getSetting().getSetting())
-                .toList();
+                .collect(Collectors.toSet());
 
-        return new BookInfoDTO(book.getTitle(), author,
+        return new BookInfoDTO(book.getId(),
+                book.getTitle(), author,
                 book.getIsbn(),
                 book.getDescription(),
                 book.getPages(),
@@ -369,8 +353,43 @@ public class BookService {
        return 0;
    }
 
-    public void findAllByCriteria(BookSearchCriteria bookSearchCriteria) {
-        List<BookResponseDto> books = bookRepository.findAll(bookSearchCriteria);
+    public PageResponseDto<BookResponseDto> findAllByCriteria(BookSearchCriteria bookSearchCriteria) {
+        // request db for getting books
+        Page<BookFlatRecord> books = bookRepository.findAll(bookSearchCriteria, bookSearchCriteria.buildPageRequest());
+        // mapping them into BookResponse
+        Map<Long, BookResponseDto> bookMap = getLongBookResponseDtoMap(books);
+        
+        List<BookResponseDto> groupedDtos = new ArrayList<>(bookMap.values().stream().sorted(
+                (bkRs1, bkRs2) -> bkRs1.getId().compareTo(bkRs2.getId())
+        ).toList());
 
+        return PageResponseDto.from(new PageImpl<>(groupedDtos,
+                books.getPageable(),
+                books.getTotalElements()));
+    }
+
+    private Map<Long, BookResponseDto> getLongBookResponseDtoMap(Page<BookFlatRecord> books) {
+        Map<Long, BookResponseDto> bookMap = new HashMap<>();
+        for (BookFlatRecord bookFlatRecord : books){
+            BookResponseDto bookResponseDto = bookMap.computeIfAbsent(bookFlatRecord.id(),
+                    id -> new BookResponseDto(bookFlatRecord.id(),
+                            bookFlatRecord.title(),
+                            bookFlatRecord.series(),
+                            bookFlatRecord.publishDate(),
+                            bookFlatRecord.rating()
+                            ) );
+            bookResponseDto.addAuthor(bookFlatRecord.author());
+            bookResponseDto.addAward(bookFlatRecord.award());
+            bookResponseDto.addCharacter(bookFlatRecord.character());
+            bookResponseDto.addGenre(bookFlatRecord.genre());
+            bookResponseDto.addPublisher(bookFlatRecord.publisher());
+        }
+        return bookMap;
     }
 }
+//Long id,
+//String title,
+//String series,
+//String publishDate,
+//Integer rating
+

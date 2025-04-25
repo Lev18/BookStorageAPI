@@ -92,7 +92,7 @@ public class BookUploadService {
 
 
         Map<String, Characters> allExistingCharacters = charactersRepository.findAll().stream()
-                .collect(Collectors.toConcurrentMap(characters -> characters.getCharacterName()
+                .collect(Collectors.toConcurrentMap(characters -> characters.getName()
                                 .toLowerCase().trim(),
                         characters -> characters));
 

@@ -1,9 +1,11 @@
 package com.bookstore.repository;
 
 import com.bookstore.criteria.BookSearchCriteria;
-import com.bookstore.dto.responseDto.BookResponseDto;
+import com.bookstore.dto.responseDto.BookFlatRecord;
 import com.bookstore.entity.Book;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -91,26 +93,87 @@ public interface BookRepository extends JpaRepository<Book, String> {
     @Transactional
     void deleteBookByISBN(@Param("bookIsbn") String bookIsbn);
 
+//    String genre,
+//    String author,
+//    String publisher,
+//    String award
     @Query("""
-            SELECT new com.bookstore.dto.responseDto.BookResponseDto(
+            SELECT DISTINCT new com.bookstore.dto.responseDto.BookFlatRecord(
                     b.id,
                     b.title,
                     b.seriesNumber,
-                    b.publishDate)
+                    b.publishDate,
+                    b.numRatings,
+                    g.genre.name,
+                    aut.author.name,
+                    p.publisher.name,
+                    ch.character.name,
+                    aw.award.name
+                    )
             FROM Book  b
                 LEFT JOIN b.author aut
                 LEFT JOIN b.genres g
                 LEFT JOIN b.bookPublishers p
                 LEFT JOIN b.awards aw
+                LEFT JOIN b.characters ch
             WHERE (:#{#criteria.genre} IS NULL OR g.genre.name LIKE CONCAT('%', :#{#criteria.genre}, '%'))
-                AND (:#{#criteria.publisher} IS NULL OR p.publisher.name LIKE CONCAT('%', :#{#criteria.publisher},'%'))
-                AND (:#{#criteria.author} IS NULL OR aut.author.name LIKE CONCAT('%', :#{#criteria.author}, '%'))
-                AND(:#{#criteria.award} IS NULL OR aw.award.name LIKE CONCAT('%', :#{#criteria.award}, '%'))
+                AND (:#{#criteria.publisher} IS NULL OR p IS NULL OR p.publisher.name LIKE CONCAT('%', :#{#criteria.publisher},'%'))
+                AND (:#{#criteria.author} IS NULL OR aut IS NULL OR aut.author.name LIKE CONCAT('%', :#{#criteria.author}, '%'))
+                AND(:#{#criteria.award} IS NULL OR aw IS NULL OR aw.award.name LIKE CONCAT('%', :#{#criteria.award}, '%'))
+                AND(:#{#criteria.character} IS NULL OR aw IS NULL OR ch.character.name LIKE CONCAT('%', :#{#criteria.character}, '%'))
      """
     )
-    List<BookResponseDto> findAll(BookSearchCriteria criteria);
-//    private String genre;
-//    private String publisher;
-//    private String author;
-//    private String award;
+    Page<BookFlatRecord> findAll(BookSearchCriteria criteria, Pageable pageable);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//SELECT b.id, b.title, b.seriesNumber, b.publishDate
+//FROM books  b
+//LEFT JOIN book_genres bg on bg.book_id = b.id
+//LEFT JOIN genres g on bg.genre_id = g.id
+//LEFT JOIN b.genres g
+//LEFT JOIN b.bookPublishers p
+//LEFT JOIN b.awards aw
+//WHERE (:#{#criteria.genre} IS NULL OR g.genre.name LIKE CONCAT('%', :#{#criteria.genre}, '%'))
+//AND (:#{#criteria.publisher} IS NULL OR p.publisher.name LIKE CONCAT('%', :#{#criteria.publisher},'%'))
+//AND (:#{#criteria.author} IS NULL OR aut.author.name LIKE CONCAT('%', :#{#criteria.author}, '%'))
+//AND(:#{#criteria.award} IS NULL OR aw.award.name LIKE CONCAT('%', :#{#criteria.award}, '%'))
+
+//3956203 | adult fiction  | viking | Ruth Ozeki (Goodreads Author)   andrew carnegie medal nominee
+
+
+
+
+
+
+
