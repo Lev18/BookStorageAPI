@@ -9,19 +9,19 @@ import java.util.Map;
 
 @Component
 public class BookDtoToSeriesMapper {
-    public Series mapBookToSeries(BookCsvDto bookCsvDto,
+    public Series mapBookToSeries(String bookCsvDto,
                                   Map<String, Series> allSeriesExist,
                                   List<Series> allNewSeries) {
 
-        if (!bookCsvDto.getSeries().isBlank() && !bookCsvDto.getSeries().equals("\"\"")) {
-            String cleanSeries = bookCsvDto.getSeries().split("#")[0].trim().toLowerCase();
+        if (!bookCsvDto.isBlank() && !bookCsvDto.equals("\"\"")) {
+            String cleanSeries = bookCsvDto.split("#")[0].trim().toLowerCase();
             Series newSeries1 = allSeriesExist.computeIfAbsent(cleanSeries, Series::new);
 
             allNewSeries.add(newSeries1);
             return newSeries1;
         }
 
-        String cleanTitle = bookCsvDto.getTitle().toLowerCase().trim();
+        String cleanTitle = bookCsvDto.toLowerCase().trim();
         Series newSeries = allSeriesExist.computeIfAbsent(cleanTitle, Series::new);
             allNewSeries.add(newSeries);
         return newSeries;

@@ -14,12 +14,12 @@ import java.util.*;
 public class BookDtoToCharacterMapper {
     private final CharactersRepository charactersRepository;
     @Transactional
-    public List<Characters> mapBookDtoToCharacter(BookCsvDto bookDto,
+    public List<Characters> mapBookDtoToCharacter(List<String> bookDto,
                                                   Map<String, Characters> charactersMap,
                                                   List<Characters> newCharacters) {
         List<Characters> allCharacters = new ArrayList<>();
 
-        for (String s : bookDto.getCharacters()) {
+        for (String s : bookDto) {
             if (!s.isBlank()) {
                 String cleanCharacter = s.replaceAll("'", "").trim().toLowerCase();
 

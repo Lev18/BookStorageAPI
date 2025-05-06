@@ -14,13 +14,13 @@ import java.util.Map;
 public class BookToGenreMapper {
     // it is service logic
 //    private final GenreRepository genreRepository;
-    public List<Genre> findOrCreateGenre(BookCsvDto bookCsvDto,
+    public List<Genre> mapBookToGenre(List<String> bookGenres,
                                          // rename
                                          Map<String, Genre> genresExist,
                                          List<Genre> allNewGenres) {
-        List<Genre> genres = new ArrayList<>();
 
-        for (String genre : bookCsvDto.getGenres()) {
+        List<Genre> genres = new ArrayList<>();
+        for (String genre : bookGenres) {
             String cleanGenre = genre.replaceAll("'","").trim().toLowerCase();
             Genre existingGenre = genresExist.computeIfAbsent(cleanGenre, key-> {
                Genre newGenre = new Genre(cleanGenre);

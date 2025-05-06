@@ -23,7 +23,7 @@ public class UserService {
         String email = requestDto.getEmail().toLowerCase().trim();
         if (userRepository.existsByEmail(email)) {
             //TODO: User already exist
-            throw new RuntimeException();
+            throw new RuntimeException("User already exist");
         }
 
         User newUser = new User();

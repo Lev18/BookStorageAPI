@@ -1,7 +1,7 @@
 package com.bookstore.books.exception;
 
-public class ImageNotFound extends RuntimeException {
-    public ImageNotFound(String message) {
+public class ImageNotFoundException extends RuntimeException {
+    public ImageNotFoundException(String message) {
         super(message);
     }
 }

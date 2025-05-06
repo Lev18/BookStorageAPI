@@ -14,11 +14,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BookDtoToSettingMapper {
     private final SettingRepository settingRepository;
-    public List<Setting> mapBookDtoToSetting(BookCsvDto bookDto, 
+    public List<Setting> mapBookDtoToSetting(List<String> bookDto,
                                              Map<String, Setting> allSettingExists,
                                              List<Setting> newSettings) {
         List<Setting> allSettings = new ArrayList<>();
-        for (String s : bookDto.getSetting()) {
+        for (String s : bookDto) {
             if (!s.isBlank()) {
                 String cleanSetting = s.replaceAll("'", "").trim().toLowerCase();
                 Setting setting = allSettingExists.computeIfAbsent(cleanSetting, key-> {

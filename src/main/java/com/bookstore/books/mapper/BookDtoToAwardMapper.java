@@ -12,12 +12,12 @@ import java.util.*;
 @RequiredArgsConstructor
 @Transactional
 public class BookDtoToAwardMapper {
-    public Map<String, Award> bookToAwardMapper(BookCsvDto bookCsvDto,
+    public Map<String, Award> bookToAwardMapper(List<String> bookCsvDto,
                                                 Map<String, Award> awardExist,
                                                 List<Award> newAwards) {
 
         Map<String, Award> allAwards = new HashMap<>();
-        for (String original : bookCsvDto.getAwards()) {
+        for (String original : bookCsvDto) {
             String normalized = original.split(" for ")[0]
                     .split("\\(")[0]
                     .trim().toLowerCase()
@@ -28,12 +28,13 @@ public class BookDtoToAwardMapper {
             }
             if (normalized.isBlank()) continue;
 
-            Award newAward = awardExist.get(normalized);
-            if (newAward == null) {
-                newAward = new Award(normalized);
-                    newAwards.add(newAward);
-                    awardExist.put(normalized, newAward);
-            }
+            Award newAward = awardExist.computeIfAbsent(normalized,award-> {
+                    Award newAw = new Award(award);
+                    newAwards.add(newAw);
+                    return newAw;
+                }
+            );
+
             allAwards.put(original.trim().replaceAll("'", ""), newAward);
         }
         return allAwards;

@@ -1,5 +1,6 @@
 package com.bookstore.books.mapper;
 
+import com.bookstore.books.dto.requestDto.BookRequestDto;
 import com.bookstore.books.dto.responseDto.BookInfoDTO;
 import com.bookstore.books.entity.Author;
 import com.bookstore.books.repository.AuthorRepository;
@@ -8,22 +9,29 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.function.Function;
 
 @Component
 @AllArgsConstructor
 public class BookToAuthorMapper {
-    private final AuthorRepository authorRepository;
-    public List<Author> bookToAuthorMapper(BookCsvDto bookDto,
-                                           Map<String, Author> authorsExists,
-                                           List<Author> newAuthors) {
-        List<String> authors = Arrays.stream(bookDto.getAuthor()
-                        .split(", "))
-                .toList();
 
+    public <T> List<Author> mapBookToAuthor(
+            T bookDto,
+            Function<T, Collection<String>> authorExtractor,
+            Map<String, Author> authorsExists,
+            List<Author> newAuthors
+    ) {
+        Collection<String> authors = authorExtractor.apply(bookDto);
+        return mapAuthors(authors, authorsExists, newAuthors);
+    }
+
+    private List<Author> mapAuthors(Collection<String> authors,
+                                    Map<String, Author> authorsExists,
+                                    List<Author> newAuthors) {
         List<Author> allAuthors = new ArrayList<>();
-
         for (String author : authors) {
-            Author exisingAuthor = authorsExists.computeIfAbsent(author.trim().toLowerCase(),
+            Author exisingAuthor = authorsExists.computeIfAbsent(author
+                            .trim().toLowerCase(),
                     auth-> {
                         Author newAuth = new Author(author);
                         newAuthors.add(newAuth);
@@ -31,12 +39,7 @@ public class BookToAuthorMapper {
                     });
             allAuthors.add(exisingAuthor);
         }
-
         return allAuthors;
-    }
-
-    public List<Author> mapBookDtoToAuthor(BookInfoDTO bookInfoDTO) {
-        return null;
     }
 }
 

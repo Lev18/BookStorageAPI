@@ -23,7 +23,6 @@ public class AuthenticationController {
     
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto>  login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
-
        return ResponseEntity.ok(authenticationService.authenticate(loginRequestDto));
     }
 

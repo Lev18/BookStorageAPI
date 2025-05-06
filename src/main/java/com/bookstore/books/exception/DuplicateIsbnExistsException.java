@@ -1,9 +1,7 @@
 package com.bookstore.books.exception;
 
-import org.springframework.stereotype.Component;
-
-public class DuplicateIsbnExists extends RuntimeException {
-    public DuplicateIsbnExists(String message) {
+public class DuplicateIsbnExistsException extends RuntimeException {
+    public DuplicateIsbnExistsException(String message) {
         super(message);
     }
 }

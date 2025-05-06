@@ -3,11 +3,13 @@ package com.bookstore.books.service;
 import com.bookstore.books.criteria.BookSearchCriteria;
 import com.bookstore.books.dto.csvDto.BookCsvDto;
 import com.bookstore.books.dto.requestDto.AwardDto;
+import com.bookstore.books.dto.requestDto.BookRequestDto;
 import com.bookstore.books.dto.responseDto.*;
 import com.bookstore.books.entity.*;
 import com.bookstore.books.enums.FileDownloadStatus;
-import com.bookstore.books.exception.ImageNotFound;
-import com.bookstore.books.exception.UnableParseFile;
+import com.bookstore.books.exception.BookAlreadyExistException;
+import com.bookstore.books.exception.ImageNotFoundException;
+import com.bookstore.books.exception.UnableParseFileException;
 import com.bookstore.books.mapper.*;
 import com.bookstore.books.repository.*;
 import com.bookstore.books.service.fileReader.CsvReaderService;
@@ -72,6 +74,7 @@ public class BookService {
     private final BookDtoToSettingMapper bookDtoToSettingMapper;
     private final BookDtoToSeriesMapper bookDtoToSeriesMapper;
     private final BookDtoToImageMapper bookDtoToImageMapper;
+    private final BookToInfoDtoMapper bookToInfoDtoMapper;
 
     //Repositories
     private final AuthorRepository authorRepository;
@@ -89,7 +92,6 @@ public class BookService {
     private final BookSettingRepository bookSettingRepository;
     private final BookPublisherRepository bookPublisherRepository;
     private final SeriesCharacterRepository seriesCharacterRepository;
-
 
 
     public Book updateBookRating(String bookIsbn, Integer newRate) {
@@ -110,15 +112,6 @@ public class BookService {
         return book;
     }
 
-//    public void uploadImg() throws InterruptedException {
-//        List<String> books = bookRepository.getAllUrls();
-//        for (String bookUrl : books) {
-//            CompletableFuture.runAsync(() -> {
-//                imageLoader.downloadImage(bookUrl);
-//            });
-//        }
-//    }
-
     @SneakyThrows
     public byte[] getBookImg(String bookIsbn) {
         String bookImgUrl = bookRepository.getUrlById(bookIsbn);
@@ -136,7 +129,7 @@ public class BookService {
 
             return in.readAllBytes();
         } catch (FileNotFoundException e) {
-            throw new ImageNotFound("Image not found, no such file or directory");
+            throw new ImageNotFoundException("Image not found, no such file or directory");
         }
     }
 
@@ -272,135 +265,158 @@ public class BookService {
         return null;
     }
 
-  public int insetNewBook(BookInfoDTO bookInfoDTO) {
-//        List<Book> allBooks                         = Collections.synchronizedList(new ArrayList<>());
-//        List<BookGenre> allNewBookGenres            = Collections.synchronizedList(new ArrayList<>());
-//        List<BookAuthor> allNewBookAuthor           = Collections.synchronizedList(new ArrayList<>());
-//        List<BookFormat> allNewBookFormat           = Collections.synchronizedList(new ArrayList<>());
-//        List<BookAward> allNewBookAward             = Collections.synchronizedList(new ArrayList<>());
-//        List<BookPublisher> allNewBookPublishers    = Collections.synchronizedList(new ArrayList<>());
-//        List<SeriesCharacter> allNewSeriesCharacter = Collections.synchronizedList(new ArrayList<>());
-//        List<BookSetting> allNewBookSettings        = Collections.synchronizedList(new ArrayList<>());
-//
-//        List<Publisher> allNewPublishers         = Collections.synchronizedList(new ArrayList<>());
-//        List<BookCharacter> allNewBookCharacters = Collections.synchronizedList(new ArrayList<>());
-//        List<Genre> allNewGenres                 = Collections.synchronizedList(new ArrayList<>());
-//        List<Format> allNewFormats               = Collections.synchronizedList(new ArrayList<>());
-//        List<Author> allNewAuthors               = Collections.synchronizedList(new ArrayList<>());
-//        List<Award> allNewAwards                 = Collections.synchronizedList(new ArrayList<>());
-//        List<Setting> allNewSettings             = Collections.synchronizedList(new ArrayList<>());
-//        List<Characters> allNewCharacters        = Collections.synchronizedList(new ArrayList<>());
-//        List<Series> allNewSeries                = Collections.synchronizedList(new ArrayList<>());
-//        Set<String> uniqueIsbn                   = Collections.synchronizedSet(new HashSet<>());
-//
-//        Set<RatingByStars> ratingByStars = Collections.synchronizedSet(new HashSet<>());
-//
-//
-//        Map<String, Author> allExistingAuthors = authorRepository.findAll().stream()
-//                .collect(Collectors.toConcurrentMap(author -> author.getAuthorName()
-//                                .toLowerCase().trim(),
-//                        author -> author));
-//
-//
-//        Map<String, Author> allExistingAuthors = authorRepository.findAll().stream()
-//                .collect(Collectors.toConcurrentMap(author -> author.getAuthorName()
-//                                .toLowerCase().trim(),
-//                        author -> author));
-//
-//
-//        Map<String, Characters> allExistingCharacters = charactersRepository.findAll().stream()
-//                .collect(Collectors.toConcurrentMap(characters -> characters.getCharacterName()
-//                                .toLowerCase().trim(),
-//                        characters -> characters));
-//
-//
-//        Map<String, Award> allExistingAwards = awardsRepository.findAll().stream()
-//                .collect(Collectors.toConcurrentMap(award -> award.getName()
-//                                .toLowerCase().trim(),
-//                        award -> award));
-//
-//
-//        Map<String, Setting> allExistingSettings = settingRepository.findAll().stream()
-//                .collect(Collectors.toConcurrentMap(setting -> setting.getSetting()
-//                                .toLowerCase().trim(),
-//                        setting -> setting));
-//
-//
-//        Map<String, Genre> allExistingGenres = genreRepository.findAll().stream()
-//                .collect(Collectors.toConcurrentMap(genre -> genre.getGenreTitle()
-//                                .toLowerCase().trim(),
-//                        genre -> genre));
-//
-//
-//        Map<String, Format> allFormatExists = formatRepository.findAll().stream()
-//                .collect(Collectors.toConcurrentMap(format -> format.getFormat()
-//                                .toLowerCase().trim(),
-//                        format -> format));
-//
-//        Map<String, Publisher> allPublisherExists = publisherRepository.findAll().stream()
-//                .collect(Collectors.toConcurrentMap(publisher -> publisher.getPublisherName()
-//                                .toLowerCase().trim(),
-//                        publisher -> publisher));
-//
-//        Map<String, Series> allSeriesExists = seriesRepository.findAll().stream()
-//                .collect(Collectors.toConcurrentMap(series -> series.getSeries()
-//                                .toLowerCase().trim(),
-//                        series -> series));
-//
-//        Book book = bookInfoDtoToBookMapper.mapBootDtoIntoBook(bookInfoDTO);
-//
-//        Series series = bookDtoToSeriesMapper.mapBookToSeries(bookInfoDTO,
-//                allSeriesExists, allNewSeries);
-//        if (series != null) book.setSeries(series);
-//
-//        allBooks.add(book);
-//        ratingByStars.addAll(book.getStars());
-//
-//        allNewBookAuthor.addAll(bookToAuthorMapper.bookToAuthorMapper(bookInfoDTO,
-//                        allExistingAuthors, allNewAuthors).stream()
-//                .map(author -> new BookAuthor(book, author)).toList());
-//
-//        allNewBookGenres.addAll(bookToGenreMapper.findOrCreateGenre(bookInfoDTO,
-//                        allExistingGenres, allNewGenres).stream()
-//                .map(genre -> new BookGenre(book, genre)).toList());
-//
-//        allNewBookFormat.addAll(bookDtoToFormatMapper.mapBookToFormat(bookInfoDTO,
-//                        allFormatExists, allNewFormats).stream()
-//                .map(format -> new BookFormat(book, format)).toList());
-//
-//        bookDtoToAwardMapper.bookToAwardMapper(bookInfoDTO,
-//                allExistingAwards, allNewAwards).forEach(
-//                (awardType, award) -> allNewBookAward
-//                        .add(new BookAward(book, award, awardType))
-//        );
-//
-//        for (Characters c : characterMapper.mapBookDtoToCharacter(bookInfoDTO,
-//                allExistingCharacters, allNewCharacters)) {
-//            allNewBookCharacters.add(new BookCharacter(book, c));
-//            if (series != null) {
-//                allNewSeriesCharacter.add(new SeriesCharacter(series, c));
-//            }
-//        }
-//
-//        allNewBookSettings.addAll(bookDtoToSettingMapper.mapBookDtoToSetting(bookInfoDTO,
-//                        allExistingSettings, allNewSettings).stream()
-//                .map(setting -> new BookSetting(book, setting)).toList());
-//
-//        allNewBookPublishers.addAll(bookDtoToPublisherMapper.bookToPublisherMapper(bookInfoDTO,
-//                        allPublisherExists, allNewPublishers).stream()
-//                .map(publisher -> new BookPublisher(book, publisher)).toList());
-//
-//        if (book != null) bookRepository.save(book);
-//
-       return 0;
-   }
+    public BookInfoDTO insertNewBook(BookRequestDto bookRequestDto) throws BookAlreadyExistException {
+        if (bookRepository.findBookByIsbn(bookRequestDto.getIsbn()) != null) {
+            throw new BookAlreadyExistException("The current book already exist ");
+        }
 
+        final BookInfoDTO bookInfoDTO = new BookInfoDTO();
+
+        List<BookAward> allNewBookAward = new ArrayList<>();
+        List<SeriesCharacter> allNewSeriesCharacter = new ArrayList<>();
+
+        List<Publisher> allNewPublishers = new ArrayList<>();
+        List<BookCharacter> allNewBookCharacters = new ArrayList<>();
+        List<Genre> allNewGenres = new ArrayList<>();
+        List<Format> allNewFormats = new ArrayList<>();
+        List<Author> allNewAuthors = new ArrayList<>();
+        List<Award> allNewAwards = new ArrayList<>();
+        List<Setting> allNewSettings = new ArrayList<>();
+        List<Characters> allNewCharacters = new ArrayList<>();
+        List<Series> allNewSeries = new ArrayList<>();
+
+        Map<String, Author> allExistingAuthors = authorRepository.findAll().stream()
+                .collect(Collectors.toConcurrentMap(author -> author.getName()
+                                .toLowerCase().trim(),
+                        author -> author));
+
+
+        Map<String, Characters> allExistingCharacters = charactersRepository.findAll().stream()
+                .collect(Collectors.toConcurrentMap(characters -> characters.getName()
+                                .toLowerCase().trim(),
+                        characters -> characters));
+
+
+        Map<String, Award> allExistingAwards = awardsRepository.findAll().stream()
+                .collect(Collectors.toConcurrentMap(award -> award.getName()
+                                .toLowerCase().trim(),
+                        award -> award));
+
+
+        Map<String, Setting> allExistingSettings = settingRepository.findAll().stream()
+                .collect(Collectors.toConcurrentMap(setting -> setting.getSetting()
+                                .toLowerCase().trim(),
+                        setting -> setting));
+
+
+        Map<String, Genre> allExistingGenres = genreRepository.findAll().stream()
+                .collect(Collectors.toConcurrentMap(genre -> genre.getName()
+                                .toLowerCase().trim(),
+                        genre -> genre));
+
+
+        Map<String, Format> allFormatExists = formatRepository.findAll().stream()
+                .collect(Collectors.toConcurrentMap(format -> format.getFormat()
+                                .toLowerCase().trim(),
+                        format -> format));
+
+        Map<String, Publisher> allPublisherExists = publisherRepository.findAll().stream()
+                .collect(Collectors.toConcurrentMap(publisher -> publisher.getName()
+                                .toLowerCase().trim(),
+                        publisher -> publisher));
+
+        Map<String, Series> allSeriesExists = seriesRepository.findAll().stream()
+                .collect(Collectors.toConcurrentMap(series -> series.getSeries()
+                                .toLowerCase().trim(),
+                        series -> series));
+
+        Book book = bookDtoToBookDBMapper.bookDtoToBookMapper(bookRequestDto);
+
+        Series series = bookDtoToSeriesMapper.mapBookToSeries(bookRequestDto.getSeries(),
+                allSeriesExists, allNewSeries);
+        if (series != null) book.setSeries(series);
+
+        List<BookAuthor> allNewBookAuthor = new ArrayList<>(bookToAuthorMapper.mapBookToAuthor(
+                        bookRequestDto,
+                        BookRequestDto::getAuthor,
+                        allExistingAuthors,
+                        allNewAuthors).stream()
+                .map(author -> new BookAuthor(book, author)).toList());
+
+        List<BookGenre> allNewBookGenres = new ArrayList<>(bookToGenreMapper.mapBookToGenre(
+                        bookRequestDto.getGenres(),
+                        allExistingGenres,
+                        allNewGenres).stream()
+                .map(genre -> new BookGenre(book, genre)).toList());
+
+        List<BookFormat> allNewBookFormat = new ArrayList<>(bookDtoToFormatMapper.mapBookToFormat(
+                        bookRequestDto,
+                        BookRequestDto::getFormats,
+                        allFormatExists,
+                        allNewFormats).stream()
+                .map(format -> new BookFormat(book, format)).toList());
+
+        bookDtoToAwardMapper.bookToAwardMapper(bookRequestDto.getAwards(),
+                allExistingAwards, allNewAwards).forEach(
+                (awardType, award) -> allNewBookAward
+                        .add(new BookAward(book, award, awardType))
+        );
+
+        for (Characters c : characterMapper.mapBookDtoToCharacter(
+                bookRequestDto.getCharacters(),
+                allExistingCharacters,
+                allNewCharacters)) {
+            allNewBookCharacters.add(new BookCharacter(book, c));
+            if (series != null) {
+                allNewSeriesCharacter.add(new SeriesCharacter(series, c));
+            }
+        }
+
+        List<BookSetting> allNewBookSettings = new ArrayList<>(bookDtoToSettingMapper.mapBookDtoToSetting(
+                        bookRequestDto.getSettings(),
+                        allExistingSettings,
+                        allNewSettings).stream()
+                .map(setting -> new BookSetting(book, setting)).toList());
+
+        List<BookPublisher> allNewBookPublishers = new ArrayList<>(bookDtoToPublisherMapper.mapBookToPublisher(
+                        bookRequestDto,
+                        BookRequestDto::getPublishers,
+                        allPublisherExists,
+                        allNewPublishers).stream()
+                .map(publisher -> new BookPublisher(book, publisher)).toList());
+
+
+        seriesRepository.saveAll(allNewSeries);
+
+        bookRepository.save(book);
+
+        genreRepository.saveAll(allNewGenres);
+        authorRepository.saveAll(allNewAuthors);
+        formatRepository.saveAll(allNewFormats);
+        publisherRepository.saveAll(allNewPublishers);
+        awardsRepository.saveAll(allNewAwards);
+        charactersRepository.saveAll(allNewCharacters);
+        settingRepository.saveAll(allNewSettings);
+
+        bookGenreRepository.saveAll(allNewBookGenres);
+        bookAuthorRepository.saveAll(allNewBookAuthor);
+        bookFormatRepository.saveAll(allNewBookFormat);
+        bookAwardRepository.saveAll(allNewBookAward);
+        bookCharacterRepository.saveAll(allNewBookCharacters);
+        bookSettingRepository.saveAll(allNewBookSettings);
+        bookPublisherRepository.saveAll(allNewBookPublishers);
+        seriesCharacterRepository.saveAll(allNewSeriesCharacter);
+
+        return bookToInfoDtoMapper.mapBookRequestToInfo(book.getId(), bookRequestDto);
+    }
+
+    // TODO: use string_aggregate method in sql query
     public PageResponseDto<BookResponseDto> findAllByCriteria(BookSearchCriteria bookSearchCriteria) {
         // request db for getting books
         Page<BookFlatRecord> books = bookRepository.findAll(bookSearchCriteria, bookSearchCriteria.buildPageRequest());
         // mapping them into BookResponse
         Map<Long, BookResponseDto> bookMap = getLongBookResponseDtoMap(books);
-        
+
         List<BookResponseDto> groupedDtos = new ArrayList<>(bookMap.values().stream().sorted(
                 (bkRs1, bkRs2) -> bkRs1.getId().compareTo(bkRs2.getId())
         ).toList());
@@ -412,14 +428,14 @@ public class BookService {
 
     private Map<Long, BookResponseDto> getLongBookResponseDtoMap(Page<BookFlatRecord> books) {
         Map<Long, BookResponseDto> bookMap = new HashMap<>();
-        for (BookFlatRecord bookFlatRecord : books){
+        for (BookFlatRecord bookFlatRecord : books) {
             BookResponseDto bookResponseDto = bookMap.computeIfAbsent(bookFlatRecord.id(),
                     id -> new BookResponseDto(bookFlatRecord.id(),
                             bookFlatRecord.title(),
                             bookFlatRecord.series(),
                             bookFlatRecord.publishDate(),
                             bookFlatRecord.rating()
-                            ) );
+                    ));
             bookResponseDto.addAuthor(bookFlatRecord.author());
             bookResponseDto.addAward(bookFlatRecord.award());
             bookResponseDto.addCharacter(bookFlatRecord.character());
@@ -516,49 +532,73 @@ public class BookService {
                             if (!uniqueIsbn.add(bookCsvDto.getIsbn())) continue;
 
                             Book book = bookDtoToBookDBMapper.bookDtoToBookMapper(bookCsvDto);
-                            Series series = bookDtoToSeriesMapper.mapBookToSeries(bookCsvDto,
+                            Series series = bookDtoToSeriesMapper.mapBookToSeries(bookCsvDto.getSeries(),
                                     allSeriesExists, allNewSeries);
                             // int currentCount = ;
-                                bookDtoToImageMapper.mapImageFileFromBookDto(book,
-                                        bookCsvDto.getCoverImg(),
-                                        allNewImages);
+                            bookDtoToImageMapper.mapImageFileFromBookDto(book,
+                                    bookCsvDto.getCoverImg(),
+                                    allNewImages);
 
                             if (series != null) book.setSeries(series);
 
                             allBooks.add(book);
                             ratingByStars.addAll(book.getStars());
 
-                            allNewBookAuthor.addAll(bookToAuthorMapper.bookToAuthorMapper(bookCsvDto,
-                                            allExistingAuthors, allNewAuthors).stream()
+                            allNewBookAuthor.addAll(bookToAuthorMapper.mapBookToAuthor(
+                                            bookCsvDto,
+                                            dto -> Arrays.stream(dto.getAuthor()
+                                                    .split(", "))
+                                                    .map(String::trim)
+                                                    .toList(),
+                                            allExistingAuthors,
+                                            allNewAuthors).stream()
                                     .map(author -> new BookAuthor(book, author)).toList());
 
-                            allNewBookGenres.addAll(bookToGenreMapper.findOrCreateGenre(bookCsvDto,
-                                            allExistingGenres, allNewGenres).stream()
+                            allNewBookGenres.addAll(bookToGenreMapper.mapBookToGenre(
+                                            bookCsvDto.getGenres(),
+                                            allExistingGenres,
+                                            allNewGenres).stream()
                                     .map(genre -> new BookGenre(book, genre)).toList());
 
-                            allNewBookFormat.addAll(bookDtoToFormatMapper.mapBookToFormat(bookCsvDto,
-                                            allFormatExists, allNewFormats).stream()
+                            allNewBookFormat.addAll(bookDtoToFormatMapper.mapBookToFormat(
+                                            bookCsvDto,
+                                            dto -> Arrays.stream(dto.getBookFormat()
+                                                            .split(", "))
+                                                    .map(String::trim)
+                                                    .toList(),
+                                            allFormatExists,
+                                            allNewFormats).stream()
                                     .map(format -> new BookFormat(book, format)).toList());
 
-                            bookDtoToAwardMapper.bookToAwardMapper(bookCsvDto,
-                                    allExistingAwards, allNewAwards).forEach(
+                            bookDtoToAwardMapper.bookToAwardMapper(bookCsvDto.getAwards(),
+                                    allExistingAwards,
+                                    allNewAwards).forEach(
                                     (awardType, award) -> allNewBookAward
                                             .add(new BookAward(book, award, awardType))
                             );
 
-                            for (Characters c : characterMapper.mapBookDtoToCharacter(bookCsvDto,
-                                    allExistingCharacters, allNewCharacters)) {
+                            for (Characters c : characterMapper.mapBookDtoToCharacter(
+                                    bookCsvDto.getCharacters(),
+                                    allExistingCharacters,
+                                    allNewCharacters)) {
                                 allNewBookCharacters.add(new BookCharacter(book, c));
                                 if (series != null) {
                                     allNewSeriesCharacter.add(new SeriesCharacter(series, c));
                                 }
                             }
-                            allNewBookSettings.addAll(bookDtoToSettingMapper.mapBookDtoToSetting(bookCsvDto,
-                                            allExistingSettings, allNewSettings).stream()
+                            allNewBookSettings.addAll(bookDtoToSettingMapper.mapBookDtoToSetting(
+                                            bookCsvDto.getSetting(),
+                                            allExistingSettings,
+                                            allNewSettings).stream()
                                     .map(setting -> new BookSetting(book, setting)).toList());
 
-                            allNewBookPublishers.addAll(bookDtoToPublisherMapper.bookToPublisherMapper(bookCsvDto,
-                                            allPublisherExists, allNewPublishers).stream()
+                            allNewBookPublishers.addAll(bookDtoToPublisherMapper.mapBookToPublisher(
+                                            bookCsvDto,
+                                            dto -> Arrays.stream(dto.getPublisher().split("/"))
+                                                    .map(String::trim)
+                                                    .toList(),
+                                            allPublisherExists,
+                                            allNewPublishers).stream()
                                     .map(publisher -> new BookPublisher(book, publisher)).toList());
 
 
@@ -575,25 +615,25 @@ public class BookService {
         bookRepository.saveAll(allBooks);
 
         CompletableFuture.allOf(
-                CompletableFuture.runAsync(()->fileRepository.saveAll(allNewImages)),
-                CompletableFuture.runAsync(()->genreRepository.saveAll(allNewGenres)),
-                CompletableFuture.runAsync(()->authorRepository.saveAll(allNewAuthors)),
-                CompletableFuture.runAsync(()->formatRepository.saveAll(allNewFormats)),
-                CompletableFuture.runAsync(()->publisherRepository.saveAll(allNewPublishers)),
-                CompletableFuture.runAsync(()->awardsRepository.saveAll(allNewAwards)),
-                CompletableFuture.runAsync(()->charactersRepository.saveAll(allNewCharacters)),
-                CompletableFuture.runAsync(()->settingRepository.saveAll(allNewSettings))
+                CompletableFuture.runAsync(() -> fileRepository.saveAll(allNewImages)),
+                CompletableFuture.runAsync(() -> genreRepository.saveAll(allNewGenres)),
+                CompletableFuture.runAsync(() -> authorRepository.saveAll(allNewAuthors)),
+                CompletableFuture.runAsync(() -> formatRepository.saveAll(allNewFormats)),
+                CompletableFuture.runAsync(() -> publisherRepository.saveAll(allNewPublishers)),
+                CompletableFuture.runAsync(() -> awardsRepository.saveAll(allNewAwards)),
+                CompletableFuture.runAsync(() -> charactersRepository.saveAll(allNewCharacters)),
+                CompletableFuture.runAsync(() -> settingRepository.saveAll(allNewSettings))
         ).join();
         CompletableFuture.allOf(
-                CompletableFuture.runAsync(()->bookGenreRepository.saveAll(allNewBookGenres)),
-                CompletableFuture.runAsync(()->bookAuthorRepository.saveAll(allNewBookAuthor)),
-                CompletableFuture.runAsync(()->bookFormatRepository.saveAll(allNewBookFormat)),
-                CompletableFuture.runAsync(()->bookAwardRepository.saveAll(allNewBookAward)),
-                CompletableFuture.runAsync(()->bookCharacterRepository.saveAll(allNewBookCharacters)),
-                CompletableFuture.runAsync(()->bookSettingRepository.saveAll(allNewBookSettings)),
-                CompletableFuture.runAsync(()->bookPublisherRepository.saveAll(allNewBookPublishers)),
-                CompletableFuture.runAsync(()->seriesCharacterRepository.saveAll(allNewSeriesCharacter)),
-                CompletableFuture.runAsync(()->ratingByStarsRepository.saveAll(ratingByStars))
+                CompletableFuture.runAsync(() -> bookGenreRepository.saveAll(allNewBookGenres)),
+                CompletableFuture.runAsync(() -> bookAuthorRepository.saveAll(allNewBookAuthor)),
+                CompletableFuture.runAsync(() -> bookFormatRepository.saveAll(allNewBookFormat)),
+                CompletableFuture.runAsync(() -> bookAwardRepository.saveAll(allNewBookAward)),
+                CompletableFuture.runAsync(() -> bookCharacterRepository.saveAll(allNewBookCharacters)),
+                CompletableFuture.runAsync(() -> bookSettingRepository.saveAll(allNewBookSettings)),
+                CompletableFuture.runAsync(() -> bookPublisherRepository.saveAll(allNewBookPublishers)),
+                CompletableFuture.runAsync(() -> seriesCharacterRepository.saveAll(allNewSeriesCharacter)),
+                CompletableFuture.runAsync(() -> ratingByStarsRepository.saveAll(ratingByStars))
         ).join();
 
         List<FileInfo> originalImages = getFileInfos();
@@ -614,23 +654,23 @@ public class BookService {
     private List<FileInfo> getFileInfos() {
         List<FileInfo> originalImages = fileRepository.getAllOriginalImages();
         originalImages.forEach(original -> {
-            if (imageCtr.incrementAndGet() <= 5000) {
-                    original.setFileDownloadStatus(FileDownloadStatus.DOWNLOADING);
+                    if (imageCtr.incrementAndGet() <= 5000) {
+                        original.setFileDownloadStatus(FileDownloadStatus.DOWNLOADING);
 //                    byte[] imageBytes = null;
-                    imageLoaderService.downloadImage(original, null);
-                    original.setFileDownloadStatus(FileDownloadStatus.COMPLETED);
+                        imageLoaderService.downloadImage(original, null);
+                        original.setFileDownloadStatus(FileDownloadStatus.COMPLETED);
 //                    try {
 //                        // imageResizeService.saveResizedImg("path", null);
 //                    } catch (IOException e) {
 //
 //                    }
+                    }
                 }
-            }
         );
         return originalImages;
     }
 
-    public int uploadAndSaveFile(MultipartFile file) throws UnableParseFile {
+    public int uploadAndSaveFile(MultipartFile file) throws UnableParseFileException {
         List<BookCsvDto> csvDTos = csvReaderService.uploadBooks(file);
         if (csvDTos.isEmpty()) return 0;
         // TODO if size length equal 0 then return

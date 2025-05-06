@@ -14,10 +14,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/genres")
 @AllArgsConstructor
-public class DeleteBookController {
+public class GenreController {
     private final BookService bookService;
 
-    @DeleteMapping(path = "/genre/delete/{genreName}")
+    @DeleteMapping(path = "/genre/{genreName}")
     public ResponseEntity<?> deleteGenre(@PathVariable String genreName) {
         Genre genre = bookService.deleteGenre(genreName);
         if (genre == null) {
@@ -26,6 +26,8 @@ public class DeleteBookController {
 
         return ResponseEntity.ok().body(genre.getName() + " genre  deleted\n");
     }
+    // TODO: permisson with specific role
+    // Spring expression language
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(path = "/{genre}")
     public ResponseEntity<List<GenreInfoDTO>> getAllBooksByGenre(@PathVariable String genre) {

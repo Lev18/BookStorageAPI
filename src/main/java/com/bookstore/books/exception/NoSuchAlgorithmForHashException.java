@@ -1,7 +1,7 @@
 package com.bookstore.books.exception;
 
-public class NoSuchAlgorithmForHash extends RuntimeException {
-    public NoSuchAlgorithmForHash(String message) {
+public class NoSuchAlgorithmForHashException extends RuntimeException {
+    public NoSuchAlgorithmForHashException(String message) {
         super(message);
     }
 }

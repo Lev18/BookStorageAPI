@@ -3,7 +3,7 @@ package com.bookstore.books.service.fileReader;
 import com.bookstore.books.entity.FileInfo;
 import com.bookstore.books.repository.FileRepository;
 import com.bookstore.books.dto.csvDto.BookCsvDto;
-import com.bookstore.books.exception.NoSuchFile;
+import com.bookstore.books.exception.NoSuchFileException;
 import com.bookstore.books.utils.HashUtils;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -85,7 +85,7 @@ public class CsvReaderService {
                 return bookDtos;
             }
         } catch (IOException e) {
-            throw new NoSuchFile("Provided file doesn't exist " + file.getName());
+            throw new NoSuchFileException("Provided file doesn't exist " + file.getName());
         }
     }
 }
