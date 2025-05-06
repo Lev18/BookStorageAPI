@@ -6,17 +6,16 @@ import com.bookstore.books.service.BookService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/genres")
 @AllArgsConstructor
 public class DeleteBookController {
     private final BookService bookService;
-
-
 
     @DeleteMapping(path = "/genre/delete/{genreName}")
     public ResponseEntity<?> deleteGenre(@PathVariable String genreName) {
@@ -27,8 +26,8 @@ public class DeleteBookController {
 
         return ResponseEntity.ok().body(genre.getName() + " genre  deleted\n");
     }
-
-    @GetMapping(path = "/genres/{genre}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(path = "/{genre}")
     public ResponseEntity<List<GenreInfoDTO>> getAllBooksByGenre(@PathVariable String genre) {
         List<GenreInfoDTO> allBooksByGenre= bookService.getAllBooksByGenre(genre);
         return ResponseEntity.ok().body(allBooksByGenre);
