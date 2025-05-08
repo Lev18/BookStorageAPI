@@ -18,15 +18,15 @@ public class Setting {
     @SequenceGenerator(name = "setting_seq", sequenceName = "setting_seq", allocationSize = 100)
     private Long id;
 
-    @Column(name = "setting_name")
-    private String setting;
+    @Column(name = "name")
+    private String name;
     
     @OneToMany(mappedBy="setting",
             cascade = CascadeType.REMOVE)
     private List<BookSetting> bookSettings;
 
     public Setting(String setting) {
-        this.setting = setting;
+        this.name = setting;
     }
 
 }

@@ -178,10 +178,6 @@ Ref: characters.id < series_character.character_id
 //Ref: "series"."id" < "series"."ser_name"
 
 
-
-controllers should be in one class
-should be proconsular
-/api/books/
 custom errors exceptions in controller
 getAllGenres go to repository
 /book/author/publisher

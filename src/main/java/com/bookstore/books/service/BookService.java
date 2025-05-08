@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
@@ -180,7 +181,7 @@ public class BookService {
 
         Set<String> settings = book.getBookSettings()
                 .stream()
-                .map(bookSetting -> bookSetting.getSetting().getSetting())
+                .map(bookSetting -> bookSetting.getSetting().getName())
                 .collect(Collectors.toSet());
 
         return new BookInfoDTO(book.getId(),
@@ -304,7 +305,7 @@ public class BookService {
 
 
         Map<String, Setting> allExistingSettings = settingRepository.findAll().stream()
-                .collect(Collectors.toConcurrentMap(setting -> setting.getSetting()
+                .collect(Collectors.toConcurrentMap(setting -> setting.getName()
                                 .toLowerCase().trim(),
                         setting -> setting));
 
@@ -412,39 +413,39 @@ public class BookService {
 
     // TODO: use string_aggregate method in sql query
     public PageResponseDto<BookResponseDto> findAllByCriteria(BookSearchCriteria bookSearchCriteria) {
-        // request db for getting books
-        Page<BookFlatRecord> books = bookRepository.findAll(bookSearchCriteria, bookSearchCriteria.buildPageRequest());
-        // mapping them into BookResponse
-        Map<Long, BookResponseDto> bookMap = getLongBookResponseDtoMap(books);
+        Page<Object[]> booksNative = bookRepository.findAllWithNative(bookSearchCriteria, bookSearchCriteria.buildPageRequest());
+        Map<Long, BookResponseDto> bookMap = getLongBookResponseDtoMap(booksNative);
 
-        List<BookResponseDto> groupedDtos = new ArrayList<>(bookMap.values().stream().sorted(
-                (bkRs1, bkRs2) -> bkRs1.getId().compareTo(bkRs2.getId())
+        List<BookResponseDto> groupedDtos = new ArrayList<>(bookMap.values().stream()
+                .sorted((bkRs1, bkRs2) -> bkRs1.getId().compareTo(bkRs2.getId())
         ).toList());
 
         return PageResponseDto.from(new PageImpl<>(groupedDtos,
-                books.getPageable(),
-                books.getTotalElements()));
+                booksNative.getPageable(),
+                booksNative.getTotalElements()));
     }
 
-    private Map<Long, BookResponseDto> getLongBookResponseDtoMap(Page<BookFlatRecord> books) {
+    private Map<Long, BookResponseDto> getLongBookResponseDtoMap(Page<Object[]> books) {
         Map<Long, BookResponseDto> bookMap = new HashMap<>();
-        for (BookFlatRecord bookFlatRecord : books) {
-            BookResponseDto bookResponseDto = bookMap.computeIfAbsent(bookFlatRecord.id(),
-                    id -> new BookResponseDto(bookFlatRecord.id(),
-                            bookFlatRecord.title(),
-                            bookFlatRecord.series(),
-                            bookFlatRecord.publishDate(),
-                            bookFlatRecord.rating()
+        for (Object[] bookFlatRecord : books.getContent()) {
+            BookResponseDto bookResponseDto = bookMap.computeIfAbsent((Long)bookFlatRecord[0],
+                    id -> new BookResponseDto(
+                            (Long) bookFlatRecord[0],
+                            (String) bookFlatRecord[1],
+                            (String) bookFlatRecord[2],
+                            (String) bookFlatRecord[3],
+                            (String) bookFlatRecord[4],
+                            (Integer) bookFlatRecord[5]
                     ));
-            bookResponseDto.addAuthor(bookFlatRecord.author());
-            bookResponseDto.addAward(bookFlatRecord.award());
-            bookResponseDto.addCharacter(bookFlatRecord.character());
-            bookResponseDto.addGenre(bookFlatRecord.genre());
-            bookResponseDto.addPublisher(bookFlatRecord.publisher());
+            bookResponseDto.addGenre((String) bookFlatRecord[6]);
+            bookResponseDto.addAuthor((String) bookFlatRecord[7]);
+            bookResponseDto.addPublisher((String) bookFlatRecord[8]);
+            bookResponseDto.addCharacter((String) bookFlatRecord[9]);
+            bookResponseDto.addAward((String) bookFlatRecord[10]);
+            bookResponseDto.addSettings((String)bookFlatRecord[11]);
         }
         return bookMap;
     }
-
 
     @Transactional
     public int saveBook(List<BookCsvDto> bookCsvDtos) {
@@ -493,7 +494,7 @@ public class BookService {
 
 
         Map<String, Setting> allExistingSettings = settingRepository.findAll().stream()
-                .collect(Collectors.toConcurrentMap(setting -> setting.getSetting()
+                .collect(Collectors.toConcurrentMap(setting -> setting.getName()
                                 .toLowerCase().trim(),
                         setting -> setting));
 
@@ -636,7 +637,7 @@ public class BookService {
                 CompletableFuture.runAsync(() -> ratingByStarsRepository.saveAll(ratingByStars))
         ).join();
 
-        List<FileInfo> originalImages = getFileInfos();
+        // List<FileInfo> originalImages = getFileInfos();
 
 //        List<FileInfo> smallImages = fileRepository.getAllSmallImages();
 //        smallImages.forEach(smallImage -> {
@@ -647,7 +648,7 @@ public class BookService {
 //                }
 //        );
 
-        fileRepository.saveAll(originalImages);
+       // fileRepository.saveAll(originalImages);
         return allBooks.size();
     }
 

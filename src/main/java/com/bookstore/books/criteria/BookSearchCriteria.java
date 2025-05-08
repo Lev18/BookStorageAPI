@@ -12,6 +12,7 @@ public class BookSearchCriteria extends SearchCriteria{
     private String publisher;
     private String author;
     private String award;
+    private String settings;
     private String character;
 
     @Override

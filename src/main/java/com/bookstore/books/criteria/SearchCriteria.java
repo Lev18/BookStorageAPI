@@ -13,7 +13,7 @@ public class SearchCriteria {
     private int size;
 
     public PageRequest buildPageRequest() {
-        int pageNumber = Math.max(page,0);
+        int pageNumber = Math.max(page, 0);
         int pageSize = size <= 0 ? DEFAULT_PAGE_SIZE : size;
 
         return PageRequest.of(pageNumber, pageSize);
