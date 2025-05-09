@@ -29,17 +29,17 @@ public class User implements UserDetails {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+        @Column(name = "password", nullable = false)
+        private String password;
 
-    @Column(name = "enabled", nullable = false)
-    private boolean enabled = true;
+        @Column(name = "enabled", nullable = false)
+        private boolean enabled = true;
 
-    @OneToMany(mappedBy = "user",
-            cascade = CascadeType.PERSIST,
-            orphanRemoval = true,
-    fetch = FetchType.EAGER)
-    private Set<UserRole> userRole = new HashSet<>();
+        @OneToMany(mappedBy = "user",
+                cascade = CascadeType.PERSIST,
+                orphanRemoval = true,
+        fetch = FetchType.LAZY)
+        private Set<UserRole> userRole = new HashSet<>();
 
 
     @Override

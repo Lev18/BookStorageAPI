@@ -23,6 +23,6 @@ public class Role {
 
     @OneToMany(mappedBy = "role",
             cascade = CascadeType.PERSIST,
-            orphanRemoval = true)
+            orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<UserRole> userRoles = new HashSet<>();
 }
