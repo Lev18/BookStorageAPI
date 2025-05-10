@@ -9,6 +9,7 @@ import com.bookstore.users.repository.UserRepository;
 import com.bookstore.users.repository.UserRoleRepository;
 import com.bookstore.users.service.dto.RegisterRequestDto;
 import com.bookstore.users.service.dto.RegisterResponseDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -59,5 +60,8 @@ public class UserService {
         userRole.setRole(role);
 
         userRoleRepository.save(userRole);
+    }
+
+    public void deleteUser(@Valid String email) {
     }
 }

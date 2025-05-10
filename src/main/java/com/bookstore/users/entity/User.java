@@ -41,13 +41,28 @@ public class User implements UserDetails {
         fetch = FetchType.LAZY)
         private Set<UserRole> userRole = new HashSet<>();
 
+        @OneToMany(mappedBy = "user",  fetch = FetchType.LAZY,
+                    cascade = CascadeType.PERSIST,
+                    orphanRemoval = true)
+        private Set<UserPermission> userPermissions = new HashSet<>();
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.copyOf(userRole.stream()
-                .map(role->
-                        new SimpleGrantedAuthority(role.getRole()
-                                .getRoleTypes().name())).toList());
+
+        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+
+        for (UserRole role : userRole){
+            authorities.add(new SimpleGrantedAuthority(role.getRole()
+                    .getRoleTypes().name()));
+        }
+
+        for (UserPermission permission : userPermissions) {
+            authorities.add(new SimpleGrantedAuthority(permission.getPermission()
+                    .getPermissionTypes().name()));
+        }
+
+        return authorities;
     }
 
     @Override
@@ -74,4 +89,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
     }
+
 }

@@ -1,5 +1,7 @@
 package com.bookstore.users.security;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.bookstore.users.security.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -20,10 +24,15 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private static final String AUTH_TYPE = "Bearer ";
+    private final UserDetailsService userDetailsService;
+
+    public JwtFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
+        this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -44,15 +53,18 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        final String username = jwtUtil.getUsername(token);
         final String[] authorities = jwtUtil.getAuthorities(token);
+        final DecodedJWT jwt = JWT.decode(token);
+        final String email = jwt.getClaim("email").asString();
+
+        UserDetails user = userDetailsService.loadUserByUsername(email);
 
         final List<SimpleGrantedAuthority> grantedAuthorities = Arrays.stream(authorities)
                 .map(SimpleGrantedAuthority::new)
                 .toList();
 
         final UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
+                new UsernamePasswordAuthenticationToken(user, null, grantedAuthorities);
 
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);

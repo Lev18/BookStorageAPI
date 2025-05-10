@@ -3,6 +3,7 @@ package com.bookstore.users.security.util;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.bookstore.users.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,8 +23,11 @@ public class JwtUtil {
     private String secret;
 
     public String generateAccessToken(UserDetails userDetails) {
+        User user = (User) userDetails;
+        String email = user.getEmail();
         return JWT.create()
                 .withSubject(userDetails.getUsername())
+                .withClaim("email", email)
                 .withExpiresAt(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
                 .withIssuedAt(Instant.now())
                 .withClaim(ROLES, userDetails.getAuthorities()
@@ -33,8 +37,10 @@ public class JwtUtil {
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
+        User user = (User) userDetails;
         return JWT.create()
                 .withSubject(userDetails.getUsername())
+                .withClaim("email", user.getEmail())
                 .withExpiresAt(new Date(System.currentTimeMillis() + JWT_REFRESH_TOKEN_VALIDITY))
                 .withIssuedAt(Instant.now())
                 .sign(this.getAlgorithm());

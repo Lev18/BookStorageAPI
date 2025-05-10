@@ -49,7 +49,7 @@ public class SecurityConfig {
                                 .fullyAuthenticated())
                 .sessionManagement(session-> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-               .addFilterBefore(this.jwtFilter(), UsernamePasswordAuthenticationFilter.class)
+               .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class)
                .authenticationProvider(this.authenticationProvider())
                .build();
     }
@@ -69,6 +69,6 @@ public class SecurityConfig {
 
     @Bean
     public JwtFilter jwtFilter() {
-        return new JwtFilter(jwtUtil);
+        return new JwtFilter(jwtUtil, customUserDetailService);
     }
 }
