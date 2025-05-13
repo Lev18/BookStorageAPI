@@ -3,6 +3,7 @@ package com.bookstore.books.mapper;
 import com.bookstore.books.entity.Book;
 import com.bookstore.books.entity.FileInfo;
 import com.bookstore.books.enums.FileDownloadStatus;
+import com.bookstore.books.utils.imageLoader.ImageLoaderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,46 +21,31 @@ public class BookDtoToImageMapper {
 
     @Transactional
     public void mapImageFileFromBookDto(Book book,
-                                                  String coverImgUrl,
-                                                  List<FileInfo> allNewImages) {
-        List<FileInfo> imageFile = new ArrayList<>();
+                                        String coverImgUrl,
+                                        List<FileInfo> allNewImages,
+                                        ImageLoaderService imageLoaderService) {
         if (isValidUrl(coverImgUrl)) {
-
             String[] fileFormat = coverImgUrl.split("\\.");
-            for (int i = 0; i < 3; ++i) {
                 FileInfo image = new FileInfo();
                 image.setFileUrl(coverImgUrl);
                 image.setFileFormat(fileFormat[fileFormat.length - 1]);
                 image.setFileDownloadStatus(FileDownloadStatus.PENDING);
-                switch (i) {
-                    case 0:
-                        image.setFilePath(getFileUrl(coverImgUrl, "original"));
-                        break;
-                    case 1:
-                        image.setFilePath(getFileUrl(coverImgUrl, "medium"));
-                        break;
-                    case 2:
-                        image.setFilePath(getFileUrl(coverImgUrl, "small"));
-                        break;
-                }
+                image.setFilePath(getFileUrl(coverImgUrl, "original"));
                 image.setBook(book);
-                imageFile.add(image);
                 allNewImages.add(image);
+//                image.setFileDownloadStatus(FileDownloadStatus.DOWNLOADING);
+//                imageLoaderService.downloadImage(image, null);
+//                image.setFileDownloadStatus(FileDownloadStatus.COMPLETED);
             }
         }
-    }
 
     public String getFileUrl(String url, String directory) {
         String[] urlParts = url.split("/");
         FileSystemView view = FileSystemView.getFileSystemView();
-        // move to application properties
-
-
         String ImageFilePath = view.getHomeDirectory().getPath() + imagePath + directory;
-        String outputFile = ImageFilePath + "/" +
+        return ImageFilePath + "/" +
                 urlParts[urlParts.length - 2] + "/" +
                 urlParts[urlParts.length - 1];
-        return outputFile;
     }
 
     private boolean isValidUrl(String url) {

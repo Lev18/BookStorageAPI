@@ -2,14 +2,19 @@ package com.bookstore.users.config;
 
 
 import com.bookstore.users.controller.AuthenticationController;
+import com.bookstore.users.entity.Permission;
+import com.bookstore.users.enums.PermissionTypes;
+import com.bookstore.users.repository.PermissionRepository;
 import com.bookstore.users.security.CustomUserDetailService;
 import com.bookstore.users.security.JwtFilter;
 import com.bookstore.users.security.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;

@@ -14,10 +14,8 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @RequiredArgsConstructor
 public class ImageLoaderService {
-
     @Async("taskExecutor")
-    public CompletableFuture<Void> downloadImage(FileInfo fileInfo,
-                                                 byte[] forResize) {
+    public CompletableFuture<Void> downloadImage(FileInfo fileInfo) {
         //TODO: find validation method for url
                 try (InputStream in = new URL(fileInfo.getFileUrl())
                         .openStream()) {
@@ -35,13 +33,7 @@ public class ImageLoaderService {
 
                     Files.write(originalFile.toPath(),
                             imageBytes);
-
-
-                    forResize = imageBytes;
                     System.out.println("Current dir:" + originalFile.getParentFile());
-
-                    // save resized image
-                   // imageResizeService.saveResizedImg(url, imageBytes);
 
                 } catch (IOException ex) {
                     fileInfo.setFileDownloadStatus(FileDownloadStatus.FAILED);

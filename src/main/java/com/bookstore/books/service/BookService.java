@@ -418,7 +418,7 @@ public class BookService {
 
         List<BookResponseDto> groupedDtos = new ArrayList<>(bookMap.values().stream()
                 .sorted((bkRs1, bkRs2) -> bkRs1.getId().compareTo(bkRs2.getId())
-        ).toList());
+                ).toList());
 
         return PageResponseDto.from(new PageImpl<>(groupedDtos,
                 booksNative.getPageable(),
@@ -428,7 +428,7 @@ public class BookService {
     private Map<Long, BookResponseDto> getLongBookResponseDtoMap(Page<Object[]> books) {
         Map<Long, BookResponseDto> bookMap = new HashMap<>();
         for (Object[] bookFlatRecord : books.getContent()) {
-            BookResponseDto bookResponseDto = bookMap.computeIfAbsent((Long)bookFlatRecord[0],
+            BookResponseDto bookResponseDto = bookMap.computeIfAbsent((Long) bookFlatRecord[0],
                     id -> new BookResponseDto(
                             (Long) bookFlatRecord[0],
                             (String) bookFlatRecord[1],
@@ -442,7 +442,7 @@ public class BookService {
             bookResponseDto.addPublisher((String) bookFlatRecord[8]);
             bookResponseDto.addCharacter((String) bookFlatRecord[9]);
             bookResponseDto.addAward((String) bookFlatRecord[10]);
-            bookResponseDto.addSettings((String)bookFlatRecord[11]);
+            bookResponseDto.addSettings((String) bookFlatRecord[11]);
         }
         return bookMap;
     }
@@ -480,30 +480,25 @@ public class BookService {
                                 .toLowerCase().trim(),
                         author -> author));
 
-
         Map<String, Characters> allExistingCharacters = charactersRepository.findAll().stream()
                 .collect(Collectors.toConcurrentMap(characters -> characters.getName()
                                 .toLowerCase().trim(),
                         characters -> characters));
-
 
         Map<String, Award> allExistingAwards = awardsRepository.findAll().stream()
                 .collect(Collectors.toConcurrentMap(award -> award.getName()
                                 .toLowerCase().trim(),
                         award -> award));
 
-
         Map<String, Setting> allExistingSettings = settingRepository.findAll().stream()
                 .collect(Collectors.toConcurrentMap(setting -> setting.getName()
                                 .toLowerCase().trim(),
                         setting -> setting));
 
-
         Map<String, Genre> allExistingGenres = genreRepository.findAll().stream()
                 .collect(Collectors.toConcurrentMap(genre -> genre.getName()
                                 .toLowerCase().trim(),
                         genre -> genre));
-
 
         Map<String, Format> allFormatExists = formatRepository.findAll().stream()
                 .collect(Collectors.toConcurrentMap(format -> format.getFormat()
@@ -531,14 +526,14 @@ public class BookService {
                     for (BookCsvDto bookCsvDto : batch) {
                         try {
                             if (!uniqueIsbn.add(bookCsvDto.getIsbn())) continue;
-
                             Book book = bookDtoToBookDBMapper.bookDtoToBookMapper(bookCsvDto);
                             Series series = bookDtoToSeriesMapper.mapBookToSeries(bookCsvDto.getSeries(),
                                     allSeriesExists, allNewSeries);
                             // int currentCount = ;
                             bookDtoToImageMapper.mapImageFileFromBookDto(book,
                                     bookCsvDto.getCoverImg(),
-                                    allNewImages);
+                                    allNewImages,
+                                    imageLoaderService);
 
                             if (series != null) book.setSeries(series);
 
@@ -548,7 +543,7 @@ public class BookService {
                             allNewBookAuthor.addAll(bookToAuthorMapper.mapBookToAuthor(
                                             bookCsvDto,
                                             dto -> Arrays.stream(dto.getAuthor()
-                                                    .split(", "))
+                                                            .split(", "))
                                                     .map(String::trim)
                                                     .toList(),
                                             allExistingAuthors,
@@ -601,8 +596,6 @@ public class BookService {
                                             allPublisherExists,
                                             allNewPublishers).stream()
                                     .map(publisher -> new BookPublisher(book, publisher)).toList());
-
-
                         } catch (Exception e) {
                             log.error("Error processing book DTO: {}", bookCsvDto, e);
                         }
@@ -637,37 +630,42 @@ public class BookService {
                 CompletableFuture.runAsync(() -> ratingByStarsRepository.saveAll(ratingByStars))
         ).join();
 
-        // List<FileInfo> originalImages = getFileInfos();
-
-//        List<FileInfo> smallImages = fileRepository.getAllSmallImages();
-//        smallImages.forEach(smallImage -> {
-//                    if (imageCtr.incrementAndGet() <= 5000) {
-//                        smallImage.setFileDownloadStatus(FileDownloadStatus.DOWNLOADING);
-//                        imageLoaderService.downloadImage(smallImage);
-//                    }
-//                }
-//        );
-
-       // fileRepository.saveAll(originalImages);
+        List<FileInfo> originalImages = getFileInfos(fileRepository.getAllOriginalImages());
+//        List<FileInfo> smallImages = getSmallImages(originalImages);
+        fileRepository.saveAll(originalImages);
         return allBooks.size();
     }
 
-    private List<FileInfo> getFileInfos() {
-        List<FileInfo> originalImages = fileRepository.getAllOriginalImages();
+    private List<FileInfo> getSmallImages(List<FileInfo> originalImages) {
+        List<FileInfo> smallImages = fileRepository.getAllSmallImages();
+        originalImages.forEach(fileInfo -> {
+            try {
+
+            } catch (Exception e) {
+
+            }
+
+        });
+        return smallImages;
+    }
+
+    private List<FileInfo> getFileInfos(List<FileInfo> originalImages) {
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
         originalImages.forEach(original -> {
-                    if (imageCtr.incrementAndGet() <= 5000) {
-                        original.setFileDownloadStatus(FileDownloadStatus.DOWNLOADING);
-//                    byte[] imageBytes = null;
-                        imageLoaderService.downloadImage(original, null);
-                        original.setFileDownloadStatus(FileDownloadStatus.COMPLETED);
-//                    try {
-//                        // imageResizeService.saveResizedImg("path", null);
-//                    } catch (IOException e) {
-//
-//                    }
-                    }
+                        if (imageCtr.incrementAndGet() <= 5000) {
+                            original.setFileDownloadStatus(FileDownloadStatus.DOWNLOADING);
+                            CompletableFuture<Void> future = imageLoaderService.downloadImage(original)
+                                            .exceptionally(ex -> {
+                                                original.setFileDownloadStatus(FileDownloadStatus.FAILED);
+                                                original.setErrorMessage(ex.getMessage());
+                                                return null;
+                                            })
+                                    .thenRun(() -> original.setFileDownloadStatus(FileDownloadStatus.COMPLETED));
+                            futures.add(future);
+                        }
                 }
         );
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         return originalImages;
     }
 

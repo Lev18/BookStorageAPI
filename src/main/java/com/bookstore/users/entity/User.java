@@ -59,9 +59,8 @@ public class User implements UserDetails {
 
         for (UserPermission permission : userPermissions) {
             authorities.add(new SimpleGrantedAuthority(permission.getPermission()
-                    .getPermissionTypes().name()));
+                    .getPermissionType().name()));
         }
-
         return authorities;
     }
 

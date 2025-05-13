@@ -1,6 +1,7 @@
 package com.bookstore.users.security;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.bookstore.users.security.util.JwtUtil;
 import jakarta.servlet.FilterChain;
@@ -56,6 +57,9 @@ public class JwtFilter extends OncePerRequestFilter {
         final String[] authorities = jwtUtil.getAuthorities(token);
         final DecodedJWT jwt = JWT.decode(token);
         final String email = jwt.getClaim("email").asString();
+////        final List<String> authorities = Arrays.asList(jwt.getClaim("authority")).stream().map(
+//                Claim::asString
+//        ).toList();
 
         UserDetails user = userDetailsService.loadUserByUsername(email);
 
