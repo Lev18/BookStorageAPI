@@ -6,6 +6,7 @@ import com.bookstore.users.service.AuthenticationService;
 import com.bookstore.users.service.UserService;
 import com.bookstore.users.service.dto.RegisterRequestDto;
 import com.bookstore.users.service.dto.RegisterResponseDto;
+import com.bookstore.users.util.EmailValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponseDto>  register(@Valid @RequestBody RegisterRequestDto requestDto) {
+    public ResponseEntity<?>  register(@Valid @RequestBody RegisterRequestDto requestDto) {
+        if (!EmailValidator.isEmailValid(requestDto.getEmail())) {
+            return ResponseEntity.badRequest().body("Invalid request");
+        }
         return ResponseEntity.ok(userService.register(requestDto));
     }
 }

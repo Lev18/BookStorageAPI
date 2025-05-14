@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -39,6 +40,12 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserDetailsService customUserDetailService;
     private final JwtUtil jwtUtil;
+
+    String[] PUBLIC_GET_ENDPOINTS = {
+            "/api/books/*",
+            "/api/books/image/*",
+            "/api/books/images/**"
+    };
     @Bean
     public PasswordEncoder passEncoder() {
         return new BCryptPasswordEncoder();
@@ -50,6 +57,7 @@ public class SecurityConfig {
                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request->
                         request.requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                         .anyRequest()
                                 .fullyAuthenticated())
                 .sessionManagement(session-> session

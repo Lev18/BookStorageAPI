@@ -30,7 +30,8 @@ public class CustomInitializer {
     public CommandLineRunner initPermissions() {
         return args -> {
             for (PermissionTypes types : PermissionTypes.values()) {
-                permissionRepository.findByPermissionType(types).orElseGet(() -> {
+                permissionRepository.findByPermissionType(types)
+                        .orElseGet(() -> {
                     Permission permission = new Permission();
                     permission.setPermissionType(types);
                     return permissionRepository.save(permission);
@@ -45,13 +46,11 @@ public class CustomInitializer {
         return args -> {
             for (RoleTypes types : RoleTypes.values()) {
                 roleRepository.findByRoleTypes(types)
-                        .orElseGet(
-                                () -> {
-                                    Role role = new Role();
-                                    role.setRoleTypes(types);
-                                    return roleRepository.save(role);
-                                }
-                        );
+                        .orElseGet(() -> {
+                    Role role = new Role();
+                    role.setRoleTypes(types);
+                    return roleRepository.save(role);
+                });
             }
         };
     }
@@ -67,7 +66,7 @@ public class CustomInitializer {
                 Permission permission = permissionRepository.findByPermissionType(PermissionTypes.CAN_DO_EVERYTHING)
                         .orElseThrow(EntityNotFoundException::new);
 
-                String password = UUID.randomUUID().toString().substring(0,12);
+                String password = UUID.randomUUID().toString().substring(0, 12);
 
                 User user = new User();
                 user.setUsername(ADMIN);

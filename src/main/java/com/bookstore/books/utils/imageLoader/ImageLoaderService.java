@@ -27,14 +27,11 @@ public class ImageLoaderService {
                     }
                     byte[] imageBytes = byteArrayOutputStream.toByteArray();
 
-                    // save original image
                     File originalFile = new File(fileInfo.getFilePath());
                     originalFile.getParentFile().mkdirs();
 
                     Files.write(originalFile.toPath(),
                             imageBytes);
-                    System.out.println("Current dir:" + originalFile.getParentFile());
-
                 } catch (IOException ex) {
                     fileInfo.setFileDownloadStatus(FileDownloadStatus.FAILED);
                 }

@@ -23,6 +23,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,8 +49,6 @@ public class BookService {
     final int BATCH_SIZE = 2000;
 
     private final AtomicInteger imageCtr = new AtomicInteger();
-
-    private final ImageLoaderService imageLoader;
     private final EntityManager entityManager;
 
     private final BookRepository bookRepository;
@@ -533,7 +532,8 @@ public class BookService {
                             bookDtoToImageMapper.mapImageFileFromBookDto(book,
                                     bookCsvDto.getCoverImg(),
                                     allNewImages,
-                                    imageLoaderService);
+                                    imageLoaderService,
+                                    imageCtr);
 
                             if (series != null) book.setSeries(series);
 
@@ -631,40 +631,46 @@ public class BookService {
         ).join();
 
         List<FileInfo> originalImages = getFileInfos(fileRepository.getAllOriginalImages());
-//        List<FileInfo> smallImages = getSmallImages(originalImages);
+        List<FileInfo> smallImages = getSmallImages(originalImages);
         fileRepository.saveAll(originalImages);
+        fileRepository.saveAll(smallImages);
         return allBooks.size();
     }
 
     private List<FileInfo> getSmallImages(List<FileInfo> originalImages) {
-        List<FileInfo> smallImages = fileRepository.getAllSmallImages();
+        List<FileInfo> smallImages = new ArrayList<>();
         originalImages.forEach(fileInfo -> {
             try {
-
+                imageResizeService.saveSmallImage(fileInfo);
+                FileInfo image = new FileInfo();
+                image.setFileUrl(fileInfo.getFileUrl());
+                image.setFileFormat(fileInfo.getFileFormat());
+                image.setFileDownloadStatus(FileDownloadStatus.COMPLETED);
+                image.setFilePath(fileInfo.getFilePath());
+                smallImages.add(image);
             } catch (Exception e) {
-
+                fileInfo.setErrorMessage("Unable to resize image");
             }
-
         });
         return smallImages;
     }
 
+    @Async
     private List<FileInfo> getFileInfos(List<FileInfo> originalImages) {
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         originalImages.forEach(original -> {
-                        if (imageCtr.incrementAndGet() <= 5000) {
-                            original.setFileDownloadStatus(FileDownloadStatus.DOWNLOADING);
-                            CompletableFuture<Void> future = imageLoaderService.downloadImage(original)
-                                            .exceptionally(ex -> {
-                                                original.setFileDownloadStatus(FileDownloadStatus.FAILED);
-                                                original.setErrorMessage(ex.getMessage());
-                                                return null;
-                                            })
-                                    .thenRun(() -> original.setFileDownloadStatus(FileDownloadStatus.COMPLETED));
-                            futures.add(future);
-                        }
-                }
-        );
+            original.setFileDownloadStatus(FileDownloadStatus.DOWNLOADING);
+            if (!original.getFileDownloadStatus()
+                    .equals(FileDownloadStatus.COMPLETED)) {
+                CompletableFuture<Void> future = imageLoaderService.downloadImage(original)
+                        .exceptionally(ex -> {
+                            original.setFileDownloadStatus(FileDownloadStatus.FAILED);
+                            original.setErrorMessage(ex.getMessage());
+                            return null;
+                        }).thenRun(() -> original.setFileDownloadStatus(FileDownloadStatus.COMPLETED));
+                futures.add(future);
+            }
+        });
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         return originalImages;
     }
