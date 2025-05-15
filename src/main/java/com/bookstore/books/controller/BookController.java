@@ -46,7 +46,7 @@ public class BookController {
 
 
     @PostMapping()
-    public ResponseEntity<?> insertBook(@Valid @RequestBody BookRequestDto bookRequestDto) {
+    public ResponseEntity<BookInfoDTO> insertBook(@Valid @RequestBody BookRequestDto bookRequestDto) {
         BookInfoDTO bookInfoDTO = null;
         System.out.println("Received ISBN: " + bookRequestDto.getIsbn());  // Should not be null
 

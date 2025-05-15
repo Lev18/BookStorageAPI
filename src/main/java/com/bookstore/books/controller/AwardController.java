@@ -51,9 +51,28 @@ public class AwardController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasRole('SUPER_ADMIN') or (hasRole('ADMIN') and hasAuthority('CAN_INSERT_AWARD'))")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or (hasRole('ADMIN')" +
+            " and hasAuthority('CAN_INSERT_AWARD'))")
     @PostMapping("/{award}")
-    public ResponseEntity<String> addNewAward(@PathVariable(name = "award") String award) {
+    public ResponseEntity<AwardResponseDTO> addNewAward(@PathVariable(name = "award")
+                                                            String award) {
         return ResponseEntity.ok(awardService.addNewAward(award));
+    }
+
+    @PreAuthorize("hasRole('SUPER_ADMIN') or (hasRole('ADMIN') " +
+            " and hasAuthority('CAN_INSERT_AWARD'))")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAward(@PathVariable Long id) {
+        awardService.deleteAward(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('SUPER_ADMIN') or (hasRole('ADMIN') " +
+            " and hasAuthority('CAN_INSERT_AWARD'))")
+    @PutMapping("/{id}")
+    public ResponseEntity<AwardResponseDTO> updateAward(@PathVariable Long id,
+                                                        @RequestParam AwardResponseDTO awardResponseDTO) {
+        AwardResponseDTO award = awardService.updateAward(id, awardResponseDTO);
+        return ResponseEntity.ok(award);
     }
 }

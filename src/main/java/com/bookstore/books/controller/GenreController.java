@@ -17,18 +17,12 @@ import java.util.List;
 public class GenreController {
     private final BookService bookService;
 
-    @DeleteMapping(path = "/genre/{genreName}")
-    public ResponseEntity<?> deleteGenre(@PathVariable String genreName) {
-        Genre genre = bookService.deleteGenre(genreName);
-        if (genre == null) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        }
-
-        return ResponseEntity.ok().body(genre.getName() + " genre  deleted\n");
+    @PreAuthorize("hasRole('SUPER_ADMIN') or (hasRole('ADMIN')" +
+            " and hasAuthority('CAN_DELETE_BOOK'))")    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<Void> deleteGenre(@PathVariable Long id) {
+        bookService.deleteGenre(id);
+       return ResponseEntity.noContent().build();
     }
-    // TODO: permisson with specific role
-    // Spring expression language
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(path = "/{genre}")
     public ResponseEntity<List<GenreInfoDTO>> getAllBooksByGenre(@PathVariable String genre) {
         List<GenreInfoDTO> allBooksByGenre= bookService.getAllBooksByGenre(genre);

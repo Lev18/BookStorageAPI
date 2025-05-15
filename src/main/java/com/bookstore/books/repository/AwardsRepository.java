@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface AwardsRepository extends JpaRepository<Award, String> {
+public interface AwardsRepository extends JpaRepository<Award, Long> {
     Award findByName(String newAward);
 
     @Query(value = """

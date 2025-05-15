@@ -5,6 +5,7 @@ import com.bookstore.books.dto.responseDto.AwardBookResponseDTO;
 import com.bookstore.books.dto.responseDto.AwardResponseDTO;
 import com.bookstore.books.entity.Award;
 import com.bookstore.books.repository.AwardsRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -70,11 +71,33 @@ public class AwardService {
         );
     }
 
-    public String addNewAward(@NotEmpty String awardTitle) {
+    public AwardResponseDTO addNewAward(@NotEmpty String awardTitle) {
         Award award = new Award();
         award.setName(awardTitle);
         awardsRepository.save(award);
 
-        return awardTitle;
+        return this.mapToAward(award,0l);
+    }
+
+    private AwardResponseDTO mapToAward(Award award, Long bookCount) {
+        return new AwardResponseDTO(award.getId(),
+                award.getName(), bookCount);
+    }
+    public void deleteAward(Long id) {
+      if (!awardsRepository.existsById(id)) {
+         throw  new EntityNotFoundException("Award not found " + id);
+      }
+        awardsRepository.deleteById(id);
+    }
+
+    public AwardResponseDTO updateAward(Long id,
+                                        AwardResponseDTO awardResponseDTO) {
+        Award award = awardsRepository.findById(id)
+                .orElseThrow(()->new EntityNotFoundException("Award not found"));
+
+        award.setName(awardResponseDTO.getAwardName());
+
+        Award saved = awardsRepository.save(award);
+        return this.mapToAward(saved, awardResponseDTO.getAllBooks());
     }
 }

@@ -16,6 +16,7 @@ import com.bookstore.books.service.fileReader.CsvReaderService;
 import com.bookstore.books.utils.imageLoader.ImageLoaderService;
 import com.bookstore.books.utils.imageLoader.ImageResizeService;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -241,11 +242,11 @@ public class BookService {
         return delCandidate;
     }
 
-    public Genre deleteGenre(String genreName) {
-        Genre genre = genreRepository.findByName(genreName);
-        genreRepository.deleteBookGenresByGenreId(genre.getId());
-        genreRepository.delete(genre);
-        return genre;
+    public void deleteGenre(Long id) {
+        if(!genreRepository.existsById(id)) {
+            throw  new EntityNotFoundException("Genre not fount");
+        }
+        genreRepository.deleteById(id);
     }
 
     public String addNewAward(String bookIsbn, AwardDto newAward) {
