@@ -30,4 +30,20 @@ public class AwardController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+
+    public ResponseEntity<Page<AwardResponseDTO>> getAwardBooks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        SearchCriteria searchCriteria = new SearchCriteria();
+        searchCriteria.setPage(page);
+        searchCriteria.setSize(size);
+        Pageable pageable = PageRequest.of(page, size);
+
+        return awardService.getAllAwards(searchCriteria,
+                        pageable)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
