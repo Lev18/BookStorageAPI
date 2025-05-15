@@ -58,6 +58,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request->
                         request.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/awards/**").permitAll()
                         .anyRequest()
                                 .fullyAuthenticated())
                 .sessionManagement(session-> session
