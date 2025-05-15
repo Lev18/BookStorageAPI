@@ -1,9 +1,11 @@
 package com.bookstore.books.service;
 
 import com.bookstore.books.criteria.SearchCriteria;
+import com.bookstore.books.dto.responseDto.AwardBookResponseDTO;
 import com.bookstore.books.dto.responseDto.AwardResponseDTO;
 import com.bookstore.books.entity.Award;
 import com.bookstore.books.repository.AwardsRepository;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +26,14 @@ public class AwardService {
 
     public Optional<Page<AwardResponseDTO>> getAllAwards(SearchCriteria searchCriteria, Pageable pageable) {
         return awardsRepository.findAllWithBooks(searchCriteria, pageable)
-                .map(this::toDtoPage);
+                .map(this::toAwDtoPage);
     }
 
-    private Page<AwardResponseDTO> toDtoPage(@NotNull Page<Object[]> objects) {
-        return objects.map(this::toDto);
+    private Page<AwardResponseDTO> toAwDtoPage(@NotNull Page<Object[]> objects) {
+        return objects.map(this::toAwardDto);
     }
 
-    private AwardResponseDTO toDto(@NotNull Object[] award) {
+    private AwardResponseDTO toAwardDto(@NotNull Object[] award) {
 
        AwardResponseDTO awardResponseDTO = new AwardResponseDTO();
        awardResponseDTO.setAwardId(((Award)award[0]).getId());
@@ -39,5 +41,40 @@ public class AwardService {
        awardResponseDTO.setAllBooks((Long)award[1]);
 
        return awardResponseDTO;
+    }
+
+    public Optional<Page<AwardBookResponseDTO>> getAwardBooks(Long id,
+                                                              SearchCriteria searchCriteria,
+                                                              Pageable pageable) {
+        return awardsRepository.findWithBoos(id,
+                        searchCriteria,
+                        pageable)
+                .map(this::toDtoPage);
+    }
+
+    private Page<AwardBookResponseDTO> toDtoPage(@NotNull Page<Object[]> objects) {
+        return  objects.map(this::toAwardBookDTO);
+    }
+
+    private AwardBookResponseDTO toAwardBookDTO(Object[] objects) {
+        return new AwardBookResponseDTO(
+                (Long) objects[0],
+                (Long) objects[1],
+                (String) objects[2],
+                (String) objects[3],
+                (String) objects[4],
+                (String) objects[5],
+                Arrays.stream(objects[6]
+                        .toString().split(","))
+                        .toList()
+        );
+    }
+
+    public String addNewAward(@NotEmpty String awardTitle) {
+        Award award = new Award();
+        award.setName(awardTitle);
+        awardsRepository.save(award);
+
+        return awardTitle;
     }
 }

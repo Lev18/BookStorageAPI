@@ -7,5 +7,6 @@ public enum PermissionTypes {
     CAN_UPDATE_BOOK,
     CAN_DELETE_USER,
     CAN_UPDATE_USER,
+    CAN_INSERT_AWARD,
     CAN_GET
 }
