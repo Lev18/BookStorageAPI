@@ -25,7 +25,8 @@ import java.util.*;
 public class AwardService {
     private final AwardsRepository awardsRepository;
 
-    public Optional<Page<AwardResponseDTO>> getAllAwards(SearchCriteria searchCriteria, Pageable pageable) {
+    public Optional<Page<AwardResponseDTO>> getAllAwards(SearchCriteria searchCriteria,
+                                                         Pageable pageable) {
         return awardsRepository.findAllWithBooks(searchCriteria, pageable)
                 .map(this::toAwDtoPage);
     }
@@ -47,7 +48,7 @@ public class AwardService {
     public Optional<Page<AwardBookResponseDTO>> getAwardBooks(Long id,
                                                               SearchCriteria searchCriteria,
                                                               Pageable pageable) {
-        return awardsRepository.findWithBoos(id,
+        return awardsRepository.findWithBooks(id,
                         searchCriteria,
                         pageable)
                 .map(this::toDtoPage);
@@ -83,6 +84,8 @@ public class AwardService {
         return new AwardResponseDTO(award.getId(),
                 award.getName(), bookCount);
     }
+
+
     public void deleteAward(Long id) {
       if (!awardsRepository.existsById(id)) {
          throw  new EntityNotFoundException("Award not found " + id);

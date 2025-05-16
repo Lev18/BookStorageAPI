@@ -6,13 +6,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class GenreInfoDTO {
-    private String title;
-    private String genre;
-    private String ISBN;
+    private Long id;
+    private String name;
+    private Long booksCount;
 
-    public GenreInfoDTO(String title, String genre, String isbn) {
-        this.title = title;
-        this.genre = genre;
-        this.ISBN = isbn;
+    public GenreInfoDTO(Long id, String name, Long count) {
+        this.id = id;
+        this.name = name;
+        this.booksCount = count;
     }
 }

@@ -50,8 +50,6 @@ public class BookService {
     final int BATCH_SIZE = 2000;
 
     private final AtomicInteger imageCtr = new AtomicInteger();
-    private final EntityManager entityManager;
-
     private final BookRepository bookRepository;
     private final AwardsRepository awardsRepository;
     private final BookAwardRepository bookAwardRepository;
@@ -134,22 +132,6 @@ public class BookService {
         }
     }
 
-    public List<GenreInfoDTO> getAllBooksByGenre(String genre) {
-        TypedQuery<GenreInfoDTO> query
-                = entityManager.createQuery(
-                "select new GenreInfoDTO(b.title, g.genreTitle, b.isbn) " +
-                        "from Book b " +
-                        "left join b.genres bg" +
-                        "left join Genre g on g.id = bg.genre.id " +
-                        "where genreTitle = :genreTitle " +
-                        "order by bg.id ",
-                GenreInfoDTO.class
-        );
-        query.setParameter("genreTitle", genre);
-        query.setMaxResults(100);
-
-        return query.getResultList();
-    }
 
     public BookInfoDTO getBookByISBN(String id) {
         Book book = bookRepository.findBookWithAttributes(id);
@@ -240,13 +222,6 @@ public class BookService {
         bookRepository.deleteBookCharacterByBookIsbn(isbn);
         bookRepository.deleteBookByISBN(isbn);
         return delCandidate;
-    }
-
-    public void deleteGenre(Long id) {
-        if(!genreRepository.existsById(id)) {
-            throw  new EntityNotFoundException("Genre not fount");
-        }
-        genreRepository.deleteById(id);
     }
 
     public String addNewAward(String bookIsbn, AwardDto newAward) {

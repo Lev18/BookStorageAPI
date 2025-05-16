@@ -48,6 +48,6 @@ public interface AwardsRepository extends JpaRepository<Award, Long> {
             """,
             nativeQuery = true
     )
-    Optional<Page<Object []>> findWithBoos(@Param(value = "id") Long id, SearchCriteria searchCriteria,
+    Optional<Page<Object []>> findWithBooks(@Param(value = "id") Long id, SearchCriteria searchCriteria,
                                            Pageable pageable);
 }
