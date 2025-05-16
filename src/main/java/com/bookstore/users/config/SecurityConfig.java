@@ -60,6 +60,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/awards/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/genres/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/characters/**").permitAll()
                         .anyRequest()
                                 .fullyAuthenticated())
                 .sessionManagement(session-> session

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AwardController {
     private final AwardService awardService;
+
     @GetMapping("")
     public ResponseEntity<Page<AwardResponseDTO>> getAllAwards(
             @RequestParam(defaultValue = "0") int page,
