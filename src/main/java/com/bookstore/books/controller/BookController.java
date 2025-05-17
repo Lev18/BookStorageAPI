@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,6 +32,8 @@ import java.nio.file.Paths;
 public class BookController {
     private final BookService bookService;
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or (hasRole('ADMIN')" +
+            " and hasAuthority('CAN_INSERT_BOOK'))")
     @PostMapping(path = "/file", consumes = {"multipart/form-data"})
     public ResponseEntity<?> uploadBookStore(@RequestPart("file") MultipartFile file) {
         long startTime = System.nanoTime();
@@ -38,13 +41,13 @@ public class BookController {
         long endTime = System.nanoTime();
         log.info("saved book completed in {} s", (endTime - startTime) / 1_000_000_000.0);
         if (savedBooks == 0) {
-            //TODO:Throw an error
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
         return ResponseEntity.ok(savedBooks + " new  books were saved\n");
     }
 
-
+    @PreAuthorize("hasRole('SUPER_ADMIN') or (hasRole('ADMIN')" +
+            " and hasAuthority('CAN_INSERT_BOOK'))")
     @PostMapping()
     public ResponseEntity<BookInfoDTO> insertBook(@Valid @RequestBody BookRequestDto bookRequestDto) {
         BookInfoDTO bookInfoDTO = null;
@@ -60,6 +63,8 @@ public class BookController {
         return ResponseEntity.ok(bookInfoDTO);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or (hasRole('ADMIN')" +
+            " and hasAuthority('CAN_DELETE_BOOK'))")
     @DeleteMapping(path = "/{bookIsbn}")
     public ResponseEntity<?> deleteBookByISBN(@PathVariable String bookIsbn) {
         BookInfoDTO bookInfoDTO = bookService.deleteBookByISBN(bookIsbn);
@@ -73,9 +78,8 @@ public class BookController {
     public ResponseEntity<?> getBookImage(@PathVariable String bookIsbn) throws IOException {
         byte[] img = bookService.getBookImg(bookIsbn);
         if (img == null || img.length == 0) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(img);
@@ -123,8 +127,6 @@ public class BookController {
         Path path = Paths.get("/home/levon/Workspace/ImagesBook/resized/" + directory + "/" + img);
         try (InputStream in = path.toUri().toURL()
                 .openStream()) {
-//            File file = new File("/images/169413.jpg");
-//            Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             byte[] imgBytes = in.readAllBytes();
             return ResponseEntity.ok()
                     .contentType(MediaType.IMAGE_JPEG)

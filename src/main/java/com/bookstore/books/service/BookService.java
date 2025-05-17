@@ -34,6 +34,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -56,14 +58,14 @@ public class BookService {
     private final GenreRepository genreRepository;
     private final RatingByStarsRepository ratingByStarsRepository;
 
-    // TODO: this is temporary solution
+
     private final ImageLoaderService imageLoaderService;
     private final ImageResizeService imageResizeService;
 
 
     private final CsvReaderService csvReaderService;
     private final BookDtoToBookDBMapper bookDtoToBookDBMapper;
-    // TODO: collect into BookMapperService class
+
     private final BookToGenreMapper bookToGenreMapper;
     private final BookToAuthorMapper bookToAuthorMapper;
     private final BookDtoToFormatMapper bookDtoToFormatMapper;
@@ -113,20 +115,21 @@ public class BookService {
 
     @SneakyThrows
     public byte[] getBookImg(String bookIsbn) {
-        String bookImgUrl = bookRepository.getUrlById(bookIsbn);
-        String[] urlComponents = bookImgUrl.split("/");
-        String img = urlComponents[urlComponents.length - 1];
-        String directory = urlComponents[urlComponents.length - 2];
+        Book book = bookRepository.findBookByIsbn(bookIsbn);
+        if (book == null) {
+            throw new EntityNotFoundException("Image not found");
+        }
 
-        // move to application properties
-        // how get original or resized
-        // with parameter enum
-        // truck uploaded images keep also download status in db keep images
-        Path path = Paths.get("/home/levon/Workspace/ImagesBook/resized/" + directory + "/" + img);
-        try (InputStream in = path.toUri().toURL()
-                .openStream()) {
+        FileInfo bookImgUrl = fileRepository.findByBookId(book.getId())
+                .orElseThrow(()->new IllegalArgumentException());
 
-            return in.readAllBytes();
+        if (bookImgUrl.getFileDownloadStatus().equals(FileDownloadStatus.FAILED)) {
+            throw new RuntimeException("Image not found or unable to load");
+        }
+
+        Path path = Paths.get(bookImgUrl.getFilePath());
+        try  {
+            return  Files.readAllBytes(path);
         } catch (FileNotFoundException e) {
             throw new ImageNotFoundException("Image not found, no such file or directory");
         }
@@ -386,9 +389,8 @@ public class BookService {
         return bookToInfoDtoMapper.mapBookRequestToInfo(book.getId(), bookRequestDto);
     }
 
-    // TODO: use string_aggregate method in sql query
     public PageResponseDto<BookResponseDto> findAllByCriteria(BookSearchCriteria bookSearchCriteria) {
-        Page<Object[]> booksNative = bookRepository.findAllWithNative(bookSearchCriteria, bookSearchCriteria.buildPageRequest());
+         Page<Object[]> booksNative = bookRepository.findAllWithNative(bookSearchCriteria, bookSearchCriteria.buildPageRequest());
         Map<Long, BookResponseDto> bookMap = getLongBookResponseDtoMap(booksNative);
 
         List<BookResponseDto> groupedDtos = new ArrayList<>(bookMap.values().stream()
@@ -623,6 +625,7 @@ public class BookService {
                 image.setFileFormat(fileInfo.getFileFormat());
                 image.setFileDownloadStatus(FileDownloadStatus.COMPLETED);
                 image.setFilePath(fileInfo.getFilePath());
+                image.setBook(fileInfo.getBook());
                 smallImages.add(image);
             } catch (Exception e) {
                 fileInfo.setErrorMessage("Unable to resize image");
@@ -653,8 +656,9 @@ public class BookService {
 
     public int uploadAndSaveFile(MultipartFile file) throws UnableParseFileException {
         List<BookCsvDto> csvDTos = csvReaderService.uploadBooks(file);
-        if (csvDTos.isEmpty()) return 0;
-        // TODO if size length equal 0 then return
+        if (csvDTos.isEmpty()) {
+            throw new UnableParseFileException("File already processed");
+        }
         return saveBook(csvDTos);
     }
 }

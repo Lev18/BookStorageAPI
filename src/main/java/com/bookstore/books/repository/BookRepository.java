@@ -141,30 +141,21 @@ public interface BookRepository extends JpaRepository<Book, String> {
                        b.isbn,
                        b.seriesNumber,
                        b.publishDate,
-                       b.numRatings,
-                    STRING_AGG(g.genre.name, ','),
-                    STRING_AGG(aut.author.name, ','),
-                    STRING_AGG(p.publisher.name, ',') ,
-                    STRING_AGG(ch.character.name, ','),
-                    STRING_AGG(aw.award.name, ',')
+                       b.numRatings
             FROM Book  b
                 LEFT JOIN b.author aut
+                LEFT JOIN aut.author at
                 LEFT JOIN b.genres g
                 LEFT JOIN b.bookPublishers p
                 LEFT JOIN b.awards aw
                 LEFT JOIN b.bookSettings st
                 LEFT JOIN b.characters ch
-        WHERE (:#{#criteria.genre} IS NULL OR g IS NULL OR g.genre.name LIKE CONCAT('%', :#{#criteria.genre}, '%'))
-                AND (:#{#criteria.publisher} IS NULL OR p IS NULL OR p.publisher.name LIKE CONCAT('%', :#{#criteria.publisher},'%'))
-                AND (:#{#criteria.author} IS NULL OR aut IS NULL OR aut.author.name LIKE CONCAT('%', :#{#criteria.author}, '%'))
-                AND(:#{#criteria.award} IS NULL OR aw IS NULL OR aw.award.name LIKE CONCAT('%', :#{#criteria.award}, '%'))
-                AND(:#{#criteria.character} IS NULL OR ch IS NULL OR ch.character.name LIKE CONCAT('%', :#{#criteria.character}, '%'))
+                
         GROUP BY  b.id, b.title, b.isbn, b.seriesNumber, b.publishDate, b.numRatings
      """
     )
     Page<Object []> findAllWithFilters(SearchCriteria criteria,
                                        Pageable pageable);
-
 
     @Query(value = """
             SELECT  DISTINCT b.id,

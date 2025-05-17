@@ -79,6 +79,11 @@ public class UserService {
     }
 
     public void deleteUser(@Valid String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new EntityNotFoundException("User not found"));
+        userPermissionRepository.deleteByUserId(user.getId());
+        userRoleRepository.deleteByUserId(user.getId());
+        userRepository.deleteById(user.getId());
     }
 
     public void addPrivilegesToUser(@Valid String email,

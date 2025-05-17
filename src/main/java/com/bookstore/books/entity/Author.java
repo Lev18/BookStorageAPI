@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "authors")
@@ -23,7 +24,7 @@ public class Author {
 
     @OneToMany(mappedBy = "author",
                 fetch = FetchType.LAZY)
-    private List<BookAuthor> books;
+    private Set<BookAuthor> books;
 
     public Author() {
     }
