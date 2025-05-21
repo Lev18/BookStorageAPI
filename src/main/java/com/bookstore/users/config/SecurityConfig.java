@@ -54,6 +54,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
        return httpSecurity.cors(AbstractHttpConfigurer::disable)
+               .cors(Customizer.withDefaults())
                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request->
                         request.requestMatchers("/api/auth/**").permitAll()
@@ -61,6 +62,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/awards/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/genres/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/characters/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/llm/**").permitAll()
                         .anyRequest()
                                 .fullyAuthenticated())
                 .sessionManagement(session-> session
